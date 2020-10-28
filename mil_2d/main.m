@@ -11,9 +11,9 @@ addpath('images/');
 % String of the file name
 importFileName = 'image3.png';
 % Number of randomly generated direction vectors of length one
-numberOfDirections = 10;
+numberOfDirections = 100;
 % Number of simulation runs
-numberOfSimulations = 1;
+numberOfSimulations = 250;
 
 % Create subfolder for results
 if ~exist('results', 'dir')
