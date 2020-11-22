@@ -1,87 +1,70 @@
 clc; clear all; close all;
-%% Implementation of the MIL tensor calculation in 2D
-% ...
 
-%% Input parameters
+%
+% ROI ... Region Of Interest
+% ODF ... Orientation-Dependent Feature
+%
 
-% type = 'matlab' or type = 'octave'
-type = 'matlab';
-% Add folder with example images
+addpath('functions/');
 addpath('images/');
-% String of the file name
-importFileName = 'image3.png';
-% Number of randomly generated direction vectors of length one
-numberOfDirections = 100;
-% Number of simulation runs
-numberOfSimulations = 250;
+addpath('matlab2tikz/');
 
-% Create subfolder for results
-if ~exist('results', 'dir')
-    mkdir('results')
+numberOfDifferentAngles = 250;
+
+imageFileName = 'image1_0.png';
+
+fileNameDefinit = ['definit_', imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
+
+fileName = [imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
+
+I = imread(imageFileName);
+I_ROI = I(:,:,1);
+
+%show_histogram(I_ROI)
+values = histcounts(I, 256);
+level = otsu(values);
+
+level = 1 / 256 * level;
+I_ROIBW = imbinarize(I_ROI, level);
+
+[r, c] = size(I_ROIBW);
+
+for kk = 1 : 1 : numberOfDifferentAngles
+    
+    P1 = [1; 0];
+    tau = 0 + (pi - 0) .* rand(1, 1);
+    [R] = rot2d(tau);
+    P2 = R * P1;
+    n = round(1 / norm(P2) * (P2), 4);
+
+    [xs, ys] = generate_corner_points(n, r, c);
+    
+    [MIL] = calculate_mil_2d(n, r, c, xs, ys, I_ROIBW);
+    
+    dispString = ['kk: ', num2str(kk), '/', num2str(numberOfDifferentAngles), ...
+        ', tau = ', num2str(round(rad2deg(tau), 1)), ', MIL = ', num2str(MIL)];
+    disp(dispString)
+    
+    exportData = [MIL, tau];
+    dlmwrite(fileName, exportData, '-append');
 end
-addpath('results/');
 
-%% Main loop
-for kk = 1 : 1 : numberOfSimulations
-    disp('-------------------------------------')
-    stringNumberOfSimulations = ['Current number of simulation runs: ', num2str(kk)];
-    disp(stringNumberOfSimulations)
+%% Create ellipse
 
-    %% Set timer
-    start = tic;
+[AQ, positivDefinit, lambda1, lambda2, x0, y0, a, b, alpha] = ellipse_equation(fileName);
 
-    %% Load image as matrix
+exportData = [positivDefinit, lambda1, lambda2, AQ(1,1), AQ(1,2), AQ(2,2), ...
+    AQ(3,1), AQ(3,2), AQ(3,3)];
+dlmwrite(fileNameDefinit, exportData, '-append');
 
-    [imgmatrix, r, c] = img2matrix(type, importFileName);
+show_ellipse(fileName, AQ, a, b, x0, y0, alpha)
 
-    %% Calculate MIL scalar, alpha, h, Cv
+%% Further investigation
 
-    date = datestr(now, 'yyyy_mm_dd_HH_MM_SS');
-    exportDataFileName = [date, '_export_data', '.csv'];
-    exportMILFileName = 'export_mil.csv';
+alpha_w = sum(I_ROIBW(:) == 1);
 
-    for ii = 1 : 1 : numberOfDirections
+alpha_b = sum(I_ROIBW(:) == 0);
 
-    % Generate a random direction vector of length one
+[rho_app] = average_apparent_density(alpha_w, alpha_b);
 
-    P1 = [randi(c); randi(r)];
-    P2 = [randi(c); randi(r)];
-
-    if P1(1) == P2(1) && P1(2) == P2(2)
-        P1 = [randi(c); randi(r)];
-        P2 = [randi(c); randi(r)];
-    end
-
-    n = 1 / norm(P2 - P1) * (P2 - P1);
-
-    % Calculate angle alpha
-
-    [alphaDeg] = calculate_angle(n);
-    alphaRad = deg2rad(alphaDeg);
-
-    % Calculate MIL scalar
-
-    h = 0;
-    Cv = 0;
-    [h, Cv, ~] = get_direction(n, c, r, imgmatrix, h, Cv);
-
-    MIL = h/Cv;
-
-    % Export data to csv
-
-    exportData = [MIL, alphaDeg, alphaRad, Cv, h, n(1), n(2)];
-    dlmwrite(exportDataFileName, exportData, '-append');
-    end
-
-    %% Calculate MIL Tensor M and Ellipse from MIL scalar and alpha
-
-    [M, ellipse, definite] = mean_intercept_length(exportDataFileName);
-
-    executionTime = toc(start);
-
-    exportData = [numberOfDirections, executionTime, ellipse(1), ellipse(2), ...
-        ellipse(3), ellipse(4), ellipse(5), ellipse(6), definite];
-    dlmwrite(exportMILFileName, exportData, '-append');
-    movefile(exportDataFileName, 'results');
-
-end
+[nu] = poissons_coefficient(alpha_b, alpha_w);
