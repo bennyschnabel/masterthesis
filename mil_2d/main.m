@@ -5,9 +5,21 @@ clc; clear all; close all;
 % ODF ... Orientation-Dependent Feature
 %
 
-addpath('functions/');
-addpath('images/');
-addpath('matlab2tikz/');
+application = 'M';
+
+if application == 'M'
+    % Matlab
+    addpath('functions/');
+    addpath('images/');
+    addpath('matlab2tikz/');
+elseif application == 'O'
+    % GNU Octave
+    addpath ("images:")
+    addpath ("functions:")
+else
+    disp('Error')
+    return
+end
 
 numberOfDifferentAngles = 250;
 
