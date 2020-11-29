@@ -1,4 +1,4 @@
-function [MIL] = calculate_mil_2d(n, r, c, xs, ys, I_ROIBW)
+function [MIL] = calculate_mil_2d(n, r, c, xs, ys, inc, I_ROIBW)
 
 n180 = rot2d(pi) * n;
 
@@ -14,7 +14,7 @@ if n(1) > 0 && n(2) > 0
     [x1, y1, ~] = bresenham(V2, V1);
     [x2, y2, ~] = bresenham(V3, V4);
 
-    for ii = 1 : 1 : length(x1)
+    for ii = 1 : inc : length(x1)
         P1 = [x1(ii); y1(ii)];
         P2 = [x2(ii); y2(ii)];
         
@@ -57,19 +57,37 @@ if n(1) > 0 && n(2) > 0
         [x, y, ~] = bresenham(P1, P2);
         
         h = h + norm(P2 - P1);
+        %h = h + length(x);
+        
+        % For plotting
+        x_plot = x;
+        y_plot = zeros(size(x));
+        for jj = 1 : length(x)
+            y_plot(jj) = NaN;
+        end
         
         for jj = 1 : length(x) - 1
             if I_ROIBW(y(jj), x(jj)) == 0 && I_ROIBW(y(jj + 1), x(jj + 1)) == 1
                 Ctau = Ctau + 1;
+                %x_plot(jj) = x(jj);
+                %y_plot(jj) = y(jj);
             end
         end
+        
+        %{
+        figure(2)
+        plot(x_plot, y_plot, 'kx')
+        axis([0 c 0 r])
+        hold on
+        pause(0.1)
+        %}
     end
     
 elseif n(1) < 0 && n(2) > 0
     [x1, y1, ~] = bresenham(V1, V4);
     [x2, y2, ~] = bresenham(V2, V3);
     
-    for ii = 1 : 1 : length(x1)
+    for ii = 1 : inc : length(x1)
         P1 = [x1(ii); y1(ii)];
         P2 = [x2(ii); y2(ii)];
         
@@ -112,6 +130,7 @@ elseif n(1) < 0 && n(2) > 0
         [x, y, ~] = bresenham(P1, P2);
         
         h = h + norm(P2 - P1);
+        %h = h + length(x);
         
         for jj = 1 : length(x) - 1
             if I_ROIBW(y(jj), x(jj)) == 0 && I_ROIBW(y(jj + 1), x(jj + 1)) == 1
@@ -121,7 +140,7 @@ elseif n(1) < 0 && n(2) > 0
     end
     
 elseif round(n(1)) == 1 && n(2) == 0
-    for py = 1 : 1 : r
+    for py = 1 : inc : r
         P1 = [1; py];
         fac = (c - P1(1)) / n(1);
         P2 = round(P1 + fac * n);
@@ -129,6 +148,7 @@ elseif round(n(1)) == 1 && n(2) == 0
         [x, y, ~] = bresenham(P1, P2);
         
         h = h + norm(P2 - P1);
+        %h = h + length(x);
         
         for jj = 1 : length(x) - 1
             if I_ROIBW(y(jj), x(jj)) == 0 && I_ROIBW(y(jj + 1), x(jj + 1)) == 1
@@ -139,7 +159,7 @@ elseif round(n(1)) == 1 && n(2) == 0
     
 % n = [0 1]
 elseif n(1) == 0 && round(n(2)) == 1
-    for px = 1 : 1 : c
+    for px = 1 : inc : c
         P1 = [px; 1];
         fac = (r - P1(2)) / n(2);
         P2 = round(P1 + fac * n);
@@ -147,6 +167,7 @@ elseif n(1) == 0 && round(n(2)) == 1
         [x, y, ~] = bresenham(P1, P2);
         
         h = h + norm(P2 - P1);
+        %h = h + length(x);
         
         for jj = 1 : length(x) - 1
             if I_ROIBW(y(jj), x(jj)) == 0 && I_ROIBW(y(jj + 1), x(jj + 1)) == 1
@@ -156,7 +177,7 @@ elseif n(1) == 0 && round(n(2)) == 1
     end
     
 elseif round(n(1)) == -1 && n(2) == 0
-    for py = 1 : 1 : r
+    for py = 1 : inc : r
         P1 = [c; py];
         fac = (1 - P1(1)) / n(1);
         P2 = round(P1 + fac * n);
@@ -164,6 +185,7 @@ elseif round(n(1)) == -1 && n(2) == 0
         [x, y, ~] = bresenham(P1, P2);
 
         h = h + norm(P2 - P1);
+        %h = h + length(x);
 
         for jj = 1 : length(x) - 1
             if I_ROIBW(y(jj), x(jj)) == 0 && I_ROIBW(y(jj + 1), x(jj + 1)) == 1

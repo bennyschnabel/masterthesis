@@ -17,4 +17,10 @@ M12 = (a^2 - b^2) * cos(phi) * sin(phi);
 M22 = a^2 * sin2 + a^2 * cos2;
 
 M = [[M11, M12]; [M12, M22]];
+
+try chol(M);
+    disp('MIL tensor M is symmetric positive definite.')
+catch ME
+    disp('MIL tensor M is not symmetric positive definite')
+end
 end

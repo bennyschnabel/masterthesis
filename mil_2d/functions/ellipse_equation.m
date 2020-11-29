@@ -1,4 +1,4 @@
-function [AQ, positivDefinit, lambda1, lambda2, x0, y0, a, b, alpha] = ellipse_equation(fileName)
+function [beta1, beta2, phi] = ellipse_equation(fileName)
 
 importData = table2array(readtable(fileName));
 
@@ -32,10 +32,24 @@ end
 
 XY = [xN, yN];
 % Fit an ellipse using the Bookstein constraint
-[z, a, b, alpha] = fitellipse(XY, 'linear');
+[z, beta1, beta2, phi] = fitellipse(XY, 'linear');
+[z, beta1, beta2, phi] = fitellipse(XY);
+
 x0 = z(1);
 y0 = z(2);
-[A,B,C,D,E,F] = f1(a,b,x0,y0,alpha);
+
+[EL] = EllipseFitByTaubin(XY);
+A = EL(1);
+B = EL(2);
+C = EL(3);
+D = EL(4);
+E = EL(5);
+F = EL(6);
+ 
+[beta1,beta2,x0,y0,phi] = f2(A,B,C,D,E,F);
+
+
+[A,B,C,D,E,F] = f1(beta1,beta2,x0,y0,phi);
 
 % Matrix of the quadratic form
 A33 = [[A, B/2]; [B/2, C]];
@@ -73,11 +87,6 @@ catch ME
     disp('Matrix A33 is not symmetric positive definite')
     positivDefinit = 0;
 end
-
-ev = eig(A33);
-
-lambda1 = ev(1);
-lambda2 = ev(2);
 
 function [A,B,C,D,E,F] = f1(a,b,x0,y0,alpha)
 A = a^2 * sin(alpha)^2 + b^2 * cos(alpha)^2;

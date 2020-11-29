@@ -22,8 +22,9 @@ else
 end
 
 numberOfDifferentAngles = 250;
+increment = 1;
 
-imageFileName = 'image1_0.png';
+imageFileName = 'image1_270.png';
 
 fileNameDefinit = ['definit_', imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
 
@@ -39,6 +40,16 @@ level = otsu(values);
 level = 1 / 256 * level;
 I_ROIBW = imbinarize(I_ROI, level);
 
+figure(1)
+imagesc(I_ROIBW)
+titleString = 'Initial image';
+title(titleString)
+xlabel('x_{1}')
+ylabel('x_{2}')
+colorbar
+colormap('gray')
+set(gca,'YDir','normal')
+
 [r, c] = size(I_ROIBW);
 
 for kk = 1 : 1 : numberOfDifferentAngles
@@ -51,7 +62,7 @@ for kk = 1 : 1 : numberOfDifferentAngles
 
     [xs, ys] = generate_corner_points(n, r, c);
     
-    [MIL] = calculate_mil_2d(n, r, c, xs, ys, I_ROIBW);
+    [MIL] = calculate_mil_2d(n, r, c, xs, ys, increment, I_ROIBW);
     
     dispString = ['kk: ', num2str(kk), '/', num2str(numberOfDifferentAngles), ...
         ', tau = ', num2str(round(rad2deg(tau), 1)), ', MIL = ', num2str(MIL)];
@@ -63,13 +74,15 @@ end
 
 %% Create ellipse
 
-[AQ, positivDefinit, lambda1, lambda2, x0, y0, a, b, alpha] = ellipse_equation(fileName);
+[beta1, beta2, phi] = ellipse_equation(fileName);
+[M] = mil_tensor(beta1, beta2, phi);
+%exportData = [positivDefinit, lambda1, lambda2, AQ(1,1), AQ(1,2), AQ(2,2), ...
+ %   AQ(3,1), AQ(3,2), AQ(3,3)];
+%dlmwrite(fileNameDefinit, exportData, '-append');
 
-exportData = [positivDefinit, lambda1, lambda2, AQ(1,1), AQ(1,2), AQ(2,2), ...
-    AQ(3,1), AQ(3,2), AQ(3,3)];
-dlmwrite(fileNameDefinit, exportData, '-append');
+show_ellipse(fileName, M, beta1, beta2, phi)
 
-show_ellipse(fileName, AQ, a, b, x0, y0, alpha)
+delete *.csv
 
 %% Further investigation
 
