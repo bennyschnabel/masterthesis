@@ -3,16 +3,15 @@ clc; clear all; close all;
 %
 % ROI ... Region Of Interest
 % ODF ... Orientation-Dependent Feature
+% ROIBW ... Region Of Interest Black White (Binary)
 %
 
-application = 'M';
-
-if application == 'M'
+if isOctave() == 0
     % Matlab
     addpath('functions/');
     addpath('images/');
     addpath('matlab2tikz/');
-elseif application == 'O'
+elseif isOctave() == 1
     % GNU Octave
     addpath ("images:")
     addpath ("functions:")
@@ -24,7 +23,7 @@ end
 numberOfDifferentAngles = 250;
 increment = 1;
 
-imageFileName = 'myGray.png';
+imageFileName = 'knochenprobe_1.png';
 
 fileNameDefinit = ['definit_', imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
 
@@ -40,9 +39,10 @@ level = otsu(values);
 level = 1 / 256 * level;
 I_ROIBW = imbinarize(I_ROI, level);
 
+
 figure(1)
 imagesc(I_ROIBW)
-titleString = 'Initial image';
+titleString = ['Threshold value \tau: ', num2str(level)];
 title(titleString)
 xlabel('x_{1}')
 ylabel('x_{2}')
