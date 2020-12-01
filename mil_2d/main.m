@@ -24,7 +24,7 @@ end
 numberOfDifferentAngles = 250;
 increment = 1;
 
-imageFileName = 'image1_270.png';
+imageFileName = 'myGray.png';
 
 fileNameDefinit = ['definit_', imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
 
