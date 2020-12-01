@@ -25,9 +25,11 @@ increment = 1;
 
 imageFileName = 'knochenprobe_1.png';
 
-fileNameDefinit = ['definit_', imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
-
 fileName = [imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
+
+fileNameExport = ['export_', imageFileName(1:end-4), '_', ...
+    num2str(numberOfDifferentAngles), '.csv'];
+
 
 I = imread(imageFileName);
 I_ROI = I(:,:,1);
@@ -76,13 +78,14 @@ end
 
 [beta1, beta2, phi] = ellipse_equation(fileName);
 [M] = mil_tensor(beta1, beta2, phi);
-%exportData = [positivDefinit, lambda1, lambda2, AQ(1,1), AQ(1,2), AQ(2,2), ...
- %   AQ(3,1), AQ(3,2), AQ(3,3)];
-%dlmwrite(fileNameDefinit, exportData, '-append');
+
+[v, e] = eig(M);
+exportData = [v(1,1), v(2,1), v(1,2), v(2,2), e(1,1), e(2,2)];
+dlmwrite(fileNameExport, exportData, '-append');
 
 show_ellipse(fileName, M, beta1, beta2, phi)
 
-delete *.csv
+%delete *.csv
 
 %% Further investigation
 
