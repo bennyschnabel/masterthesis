@@ -34,23 +34,24 @@ fileNameExport = ['export_', imageFileName(1:end-4), '_', ...
 I = imread(imageFileName);
 I_ROI = I(:,:,1);
 
-%show_histogram(I_ROI)
 values = histcounts(I, 256);
 level = otsu(values);
-
 level = 1 / 256 * level;
 I_ROIBW = imbinarize(I_ROI, level);
 
+%show_histogram(I_ROI, level)
 
-figure(1)
+%{
+figure()
 imagesc(I_ROIBW)
-titleString = ['Threshold value \tau: ', num2str(level)];
+titleString = ['Threshold value \tau: ', num2str(level * 256)];
 title(titleString)
 xlabel('x_{1}')
 ylabel('x_{2}')
 colorbar
 colormap('gray')
 set(gca,'YDir','normal')
+%}
 
 [r, c] = size(I_ROIBW);
 
@@ -78,9 +79,24 @@ end
 
 [beta1, beta2, phi] = ellipse_equation(fileName);
 [M] = mil_tensor(beta1, beta2, phi);
+[H] = fabric_tensor(M);
+
+%{
+if numberOfDifferentAngles == 50
+    delete knochenprobe_1_50.csv
+elseif numberOfDifferentAngles == 100
+    delete knochenprobe_1_100.csv
+elseif numberOfDifferentAngles == 250
+    delete knochenprobe_1_250.csv
+elseif numberOfDifferentAngles == 500
+    delete knochenprobe_1_500.csv
+end
+%}
 
 [v, e] = eig(M);
-exportData = [v(1,1), v(2,1), v(1,2), v(2,2), e(1,1), e(2,2)];
+[v1, e1] = eig(H);
+exportData = [v(1,1), v(2,1), v(1,2), v(2,2), e(1,1), e(2,2), ...
+    v1(1,1), v1(2,1), v1(1,2), v1(2,2), e1(1,1), e1(2,2)];
 dlmwrite(fileNameExport, exportData, '-append');
 
 show_ellipse(fileName, M, beta1, beta2, phi)

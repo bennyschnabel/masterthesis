@@ -10,3 +10,6 @@ test.m
 mil_2d/evaluation/mittelwert.m
 mil_2d/evaluation/varianz.m
 mil_2d/evaluation/wahrscheinlichkeitsdichte.m
+mil_2d/evaluation/threshold_examination.m
+*.mat
+*.tiff
