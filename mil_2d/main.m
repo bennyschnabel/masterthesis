@@ -1,10 +1,23 @@
 clc; clear all; close all;
 
+% Implementation for calculating the MIL tensor in 2D
 %
+% Abbreviations used:
+% I ... Image
 % ROI ... Region Of Interest
-% ODF ... Orientation-Dependent Feature
 % ROIBW ... Region Of Interest Black White (Binary)
 %
+
+%% User Input
+
+% Image file name
+imageFileName = 'knochenprobe_1.png';
+% Number of randomly generated angles (positiv integer)
+numberOfDifferentAngles = 250;
+% Distance between two created lines (positiv integer)
+increment = 1;
+
+%% Check if Matlab or GNU Octave
 
 if isOctave() == 0
     % Matlab
@@ -20,16 +33,12 @@ else
     return
 end
 
-numberOfDifferentAngles = 250;
-increment = 1;
-
-imageFileName = 'knochenprobe_1.png';
+%%
 
 fileName = [imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
 
 fileNameExport = ['export_', imageFileName(1:end-4), '_', ...
     num2str(numberOfDifferentAngles), '.csv'];
-
 
 I = imread(imageFileName);
 I_ROI = I(:,:,1);
@@ -55,23 +64,28 @@ set(gca,'YDir','normal')
 
 [r, c] = size(I_ROIBW);
 
+%% Loop to calculate the value MIL(theta) 
+
 for kk = 1 : 1 : numberOfDifferentAngles
     
     P1 = [1; 0];
-    tau = 0 + (pi - 0) .* rand(1, 1);
-    [R] = rot2d(tau);
+    % Creation of a random angle theta in the interval [0, pi]
+    theta = 0 + (pi - 0) .* rand(1, 1);
+    [R] = rot2d(theta);
     P2 = R * P1;
+    % Creation of a unit vector in direction of theta
     n = round(1 / norm(P2) * (P2), 4);
 
+    % Creation of the corner points for the framework
     [xs, ys] = generate_corner_points(n, r, c);
     
     [MIL] = calculate_mil_2d(n, r, c, xs, ys, increment, I_ROIBW);
     
     dispString = ['kk: ', num2str(kk), '/', num2str(numberOfDifferentAngles), ...
-        ', tau = ', num2str(round(rad2deg(tau), 1)), ', MIL = ', num2str(MIL)];
+        ', tau = ', num2str(round(rad2deg(theta), 1)), ', MIL = ', num2str(MIL)];
     disp(dispString)
     
-    exportData = [MIL, tau];
+    exportData = [MIL, theta];
     dlmwrite(fileName, exportData, '-append');
 end
 
