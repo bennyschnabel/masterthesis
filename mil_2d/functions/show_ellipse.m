@@ -41,7 +41,6 @@ plot(xN, yN, '-', 'Color', [color1(1) color2(1) color3(1)], ...
     'DisplayName',dataPointsString)
 hold on
 
-
 t = linspace(0, 2*pi, 200);
 x1 = beta1 * cos(phi) * cos(t) - beta1 * sin(phi) * sin(t);
 y1 = beta1 * sin(phi) * cos(t) + beta2 * cos(phi) * sin(t);

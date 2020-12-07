@@ -6,6 +6,7 @@ evaluation/*
 export_mil.csv
 *.csv
 *.asv
+*.txt
 test.m
 mil_2d/evaluation/mittelwert.m
 mil_2d/evaluation/varianz.m

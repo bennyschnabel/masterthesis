@@ -1,5 +1,6 @@
 function level = otsu(histogramCounts)
-total = sum(histogramCounts); % total number of pixels in the image 
+% total number of pixels in the image
+total = sum(histogramCounts);
 %% OTSU automatic thresholding
 top = 256;
 sumB = 0;
