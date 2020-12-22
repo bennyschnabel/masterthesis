@@ -7,13 +7,15 @@ imageFileName = 'Knochenprobe2.int1.stream.tiff';
 % DPI value of the image
 dpi = 1814;
 % Side length of the square/ cube created from the image [mm]
-length = 5;
+length = 1;
 % Select start image from stack (eg. '2' for second image in stack)
-startImage = 1;
+startImage = 50;
 % Select if 2D or 3D [2d, 3d]
 plotType = '3d';
 % Resolution of the export [dpi]
 resolution = 300;
+% Select if original or binary [original, binary]
+binaryType = 'original';
 
 %% Check if Matlab or GNU Octave
 
@@ -73,24 +75,36 @@ xu = x + round(va / 2);
 switch plotType
     case {'2d', '2D'}
         % Export 2D image
-
-        I_ROIBW = I(xl:xu,xl:xu,startImage);
-
-        imageFileName2d = [fileNameCropped, '_2d_', num2str(length), ...
-            'mm_', num2str(startImage), '.tex'];
+        
+        switch binaryType
+            case {'original'}
+                I_ROIBW = tiff_stack(xl:xu,xl:xu,startImage);
+                titleString = 'Initial image';
+                imageFileName2dPNG = [fileNameCropped, '_2d_', num2str(length), ...
+                    'mm_', num2str(startImage), '_i.png'];
+                imageFileName2dTEX = [fileNameCropped, '_2d_', num2str(length), ...
+                    'mm_', num2str(startImage), '_i.tex'];
+            case {'binary'}
+                I_ROIBW = I(xl:xu,xl:xu,startImage);
+                titleString = ['Threshold \tau: ', num2str(level * 256)];
+                imageFileName2dPNG = [fileNameCropped, '_2d_', num2str(length), ...
+                    'mm_', num2str(startImage), '_b.png'];
+                imageFileName2dTEX = [fileNameCropped, '_2d_', num2str(length), ...
+                    'mm_', num2str(startImage), '_b.tex'];
+            otherwise
+                warning('Unexpected plot type. No plot created.')
+        end
 
         figure()
         imagesc(I_ROIBW)
-        titleString = ['Threshold \tau: ', num2str(level * 256)];
-        %titleString = 'Initial image';
         title(titleString)
         xlabel('x_{1}')
         ylabel('x_{2}')
         colorbar
         colormap('gray')
         
-        exportgraphics(gcf, imageFileName2d, 'Resolution',resolution)
-        %matlab2tikz(imageFileName2d);
+        exportgraphics(gcf, imageFileName2dPNG, 'Resolution',resolution)
+        matlab2tikz(imageFileName2dTEX);
         
     case {'3d', '3D'}
         % Export 3D image
