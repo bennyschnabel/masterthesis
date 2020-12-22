@@ -14,3 +14,4 @@ mil_2d/evaluation/wahrscheinlichkeitsdichte.m
 mil_2d/evaluation/threshold_examination.m
 *.mat
 *.tiff
+*.png

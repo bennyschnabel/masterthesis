@@ -11,7 +11,7 @@ clc; clear all; close all;
 %% User Input
 
 % Image file name
-imageFileName = 'Knochenprobe21.mat';
+imageFileName = 'Knochenprobe2.mat';
 % Number of randomly generated angles (positiv integer)
 numberOfDifferentAngles = 250;
 % Distance between two created lines (positiv integer)
@@ -35,64 +35,25 @@ end
 
 %% Import file
 
-
 I = cell2mat(struct2cell(load(imageFileName)));
 [r, c, p] = size(I);
 
+%% 
 
-%r = 10;
-%c = 10;
-%p = 10;
+fileName = [imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
 
-%% Test
+%% Loop to calculate the value MIL(theta) 
 
-x0 = [1; 0; 0];
-y0 = [0; 1; 0];
-z0 = [0; 0; 1];
-
-P0 = [0; 0; 0];
-P1 = [1; 0; 0];
-
-theta = deg2rad(45);
-alpha = deg2rad(-45);
-
-P2 = rot3dx3(theta) * P1;
-P2 = rot3dx2(alpha) * P2;
-
-%P2 = [c; r; p];
-
-[X,Y,Z] = bresenham_3d(P1, P2);
-
-%% Plot
-%{
-plot3([P0(1) x0(1)], [P0(2) x0(2)], [P0(3) x0(3)], 'k')
-hold on
-plot3([P0(1) y0(1)], [P0(2) y0(2)], [P0(3) y0(3)], 'k')
-hold on
-plot3([P0(1) z0(1)], [P0(2) z0(2)], [P0(3) z0(3)], 'k')
-hold on
-plot3([P0(1) P1(1)], [P0(2) P1(2)], [P0(3) P1(3)], 'r-')
-hold on
-plot3([P0(1) P2(1)], [P0(2) P2(2)], [P0(3) P2(3)], 'r--')
-xlabel('x_{1}')
-ylabel('x_{2}')
-zlabel('x_{3}')
-axis equal
-% [xmin xmax ymin ymax zmin zmax]
-%axis([1 c 1 r 1 p])
-%}
-%% Test
+% Test values
 
 n = 30;
 m = 40;
 o = 50;
-
 %I = randi([0 1], n,m,o);
-
 %[r, c, p] = size(I);
 
 d = sqrt(r^2 + c^2 + p^2);
-
+%{
 theta = deg2rad(90);
 phi = deg2rad(0);
 ra = 1;
@@ -101,14 +62,37 @@ P0 = [0; 0; 0];
 [x, y, z] = sc2cc(ra, theta, phi);
 P1 = [x; y; z];
 n = P1 - P0;
-n = round(1 / norm(n) * (n), 4);
+n = round(1 / norm(P1 - P0) * (P1 - P0), 4);
 [X,Y,Z] = bresenham_3d(P0, P1);
 inc = 1;
 [MIL] = calculate_mil_3d(n, r, c, p, inc, I);
 disp(MIL)
+%}
 
-figure(1)
+%% Loop to calculate the value MIL(theta) 
 
-xlabel('x_{1}')
-ylabel('x_{2}')
-zlabel('x_{3}')
+angles = [0; 90; 180];
+%angles = 180;
+for kk = 1 : 1 : size(angles)
+    
+    theta = deg2rad(90);
+    phi = deg2rad(angles(kk));
+    ra = 1;
+
+    P0 = [0; 0; 0];
+    [x, y, z] = sc2cc(ra, theta, phi);
+    P1 = [x; y; z];
+    n = round(1 / norm(P1 - P0) * (P1 - P0), 4);
+    
+    [MIL] = calculate_mil_3d(n, r, c, p, increment, I);
+    
+    dispString = ['kk: ', num2str(kk), '/', num2str(size(angles)), ...
+        ', theta = ', num2str(round(rad2deg(theta), 1)), ...
+        ', phi = ', num2str(round(rad2deg(phi), 1)), ...
+        ', MIL = ', num2str(MIL)];
+    disp(dispString)
+    
+    exportData = [MIL, theta, phi];
+    dlmwrite(fileName, exportData, '-append');
+end
+
