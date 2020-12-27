@@ -15,3 +15,6 @@ mil_2d/evaluation/threshold_examination.m
 *.mat
 *.tiff
 *.png
+mil_3d/test1.m
+mil_3d/test2.m
+mil_3d/test3.m

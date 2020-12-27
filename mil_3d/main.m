@@ -11,8 +11,8 @@ clc; clear all; close all;
 %% User Input
 
 % Image file name
-imageFileName = 'Knochenprobe2.mat';
-% Number of randomly generated angles (positiv integer)
+imageFileName = 'Knochenprobe21.mat';
+% Number of randomly generated angles (positiv integer, minimum 9)
 numberOfDifferentAngles = 250;
 % Distance between two created lines (positiv integer)
 increment = 1;
@@ -38,45 +38,16 @@ end
 I = cell2mat(struct2cell(load(imageFileName)));
 [r, c, p] = size(I);
 
-%% 
+%% File names creation
 
 fileName = [imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
 
 %% Loop to calculate the value MIL(theta) 
 
-% Test values
+for kk = 1 : 1 : numberOfDifferentAngles
+    theta = deg2rad(180*rand(1,1));
 
-n = 30;
-m = 40;
-o = 50;
-%I = randi([0 1], n,m,o);
-%[r, c, p] = size(I);
-
-d = sqrt(r^2 + c^2 + p^2);
-%{
-theta = deg2rad(90);
-phi = deg2rad(0);
-ra = 1;
-
-P0 = [0; 0; 0];
-[x, y, z] = sc2cc(ra, theta, phi);
-P1 = [x; y; z];
-n = P1 - P0;
-n = round(1 / norm(P1 - P0) * (P1 - P0), 4);
-[X,Y,Z] = bresenham_3d(P0, P1);
-inc = 1;
-[MIL] = calculate_mil_3d(n, r, c, p, inc, I);
-disp(MIL)
-%}
-
-%% Loop to calculate the value MIL(theta) 
-
-angles = [0; 90; 180];
-%angles = 180;
-for kk = 1 : 1 : size(angles)
-    
-    theta = deg2rad(90);
-    phi = deg2rad(angles(kk));
+    phi = deg2rad(360*rand(1,1));
     ra = 1;
 
     P0 = [0; 0; 0];
@@ -86,7 +57,7 @@ for kk = 1 : 1 : size(angles)
     
     [MIL] = calculate_mil_3d(n, r, c, p, increment, I);
     
-    dispString = ['kk: ', num2str(kk), '/', num2str(size(angles)), ...
+    dispString = ['kk: ', num2str(kk), '/', num2str(numberOfDifferentAngles), ...
         ', theta = ', num2str(round(rad2deg(theta), 1)), ...
         ', phi = ', num2str(round(rad2deg(phi), 1)), ...
         ', MIL = ', num2str(MIL)];
@@ -95,4 +66,3 @@ for kk = 1 : 1 : size(angles)
     exportData = [MIL, theta, phi];
     dlmwrite(fileName, exportData, '-append');
 end
-
