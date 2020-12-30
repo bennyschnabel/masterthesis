@@ -370,7 +370,7 @@ else
             [x1, x2, x3] = bresenham_3d(q, o);
             counter = 0;
             indizes = [];
-            for mm = 1 : 1 : length(x1)
+            for mm = 1 : inc : length(x1)
                 if (x1(mm) >=  1 && x1(mm) <= r) && (x2(mm) >=  1 && x2(mm) <= c) ...
                     && (x3(mm) >=  1 && x3(mm) <= p)
                     counter = counter + 1;

@@ -10,12 +10,12 @@ clc; clear all; close all;
 
 %% User Input
 
-% Image file name
-imageFileName = 'Knochenprobe2_5mm_1.mat';
-% Number of randomly generated angles (positiv integer, minimum 9)
-numberOfDifferentAngles = 250;
+% Image file name ()
+imageFileName = 'Knochenprobe2_1mm_1.mat';
+% Number of randomly generated angles (positiv integer, minimum 9, )
+numberOfDifferentAngles = 50;
 % Distance between two created lines (positiv integer)
-increment = 1;
+increment = 5;
 
 %% Check if Matlab or GNU Octave
 
@@ -45,8 +45,8 @@ fileName = [imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv
 %% Loop to calculate the value MIL(theta) 
 
 for kk = 1 : 1 : numberOfDifferentAngles
+    % Spherical coordinates, generate direction vector
     theta = deg2rad(180*rand(1,1));
-
     phi = deg2rad(360*rand(1,1));
     ra = 1;
 
@@ -69,7 +69,7 @@ end
 
 %% Calculate ellipsoid
 
-%[beta1, beta2, phi] = ellipse_equation(fileName);
+ellipse_equation(fileName);
 
 %% Calculate MIL tensor M and fabric tensor H
 
