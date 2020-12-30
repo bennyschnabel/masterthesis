@@ -9,9 +9,9 @@ dpi = 1814;
 % Side length of the square/ cube created from the image [mm]
 length = 1;
 % Select start image from stack (eg. '2' for second image in stack)
-startImage = 50;
-% Select if 2D or 3D [2d, 3d]
-plotType = '3d';
+startImage = 1;
+% Select if 2D or 3D or mat [2d, 3d, mat]
+plotType = 'mat';
 % Resolution of the export [dpi]
 resolution = 300;
 % Select if original or binary [original, binary]
@@ -46,6 +46,7 @@ if isfile(fileName)
     load(fileName);
 else
     img2array(imageFileName, fileName);
+    load(fileName);
 end
 
 %% Calculate lengths
@@ -123,8 +124,16 @@ switch plotType
         view(30,30)
         axis vis3d
         alpha(0.3)
+        grid on
 
         exportgraphics(gcf, imageFileName3d, 'Resolution',resolution)
+    case {'mat'}
+        I_ROIBW = I(xl:xu,xl:xu,startImage:va);
+
+        matFileName = [fileNameCropped, '_', num2str(length), ...
+                    'mm_', num2str(startImage), '.mat'];
+                
+        save(matFileName,'I_ROIBW')
     otherwise
         warning('Unexpected plot type. No plot created.')
 end

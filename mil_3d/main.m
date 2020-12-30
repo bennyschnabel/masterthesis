@@ -11,7 +11,7 @@ clc; clear all; close all;
 %% User Input
 
 % Image file name
-imageFileName = 'Knochenprobe21.mat';
+imageFileName = 'Knochenprobe2_5mm_1.mat';
 % Number of randomly generated angles (positiv integer, minimum 9)
 numberOfDifferentAngles = 250;
 % Distance between two created lines (positiv integer)
@@ -66,3 +66,12 @@ for kk = 1 : 1 : numberOfDifferentAngles
     exportData = [MIL, theta, phi];
     dlmwrite(fileName, exportData, '-append');
 end
+
+%% Calculate ellipsoid
+
+%[beta1, beta2, phi] = ellipse_equation(fileName);
+
+%% Calculate MIL tensor M and fabric tensor H
+
+%[M] = mil_tensor(beta1, beta2, phi);
+%[H] = fabric_tensor(M);
