@@ -321,18 +321,26 @@ else
     fac = dR2 / sqrt(2);
     % First directional vector (direction 1, 0)
     dV = [1; 0; (-n(1) * 1 - n(2) * 0) / (n(3))];
+    % Normalize directional vector
+    dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
     % First corner point of the plane Q
     Q1 = round(PS + fac * dV);
     % Second directional vector (direction 0, 1)
     dV = [0; 1; (-n(1) * 0 - n(2) * 1) / (n(3))];
+    % Normalize directional vector
+    dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
     % Second corner point of the plane Q
     Q2 = round(PS + fac * dV);
     % Third directional vector (direction 0, -1)
     dV = [0; -1; (-n(1) * 0 - n(2) * -1) / (n(3))];
+    % Normalize directional vector
+    dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
     % Third corner point of the plane Q
     Q3 = round(PS + fac * dV);
     % Fourth directional vector (direction -1, 0)
     dV = [-1; 0; (-n(1) * -1 - n(2) * 0) / (n(3))];
+    % Normalize directional vector
+    dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
     % Fourth corner point of the plane Q
     Q4 = round(PS + fac * dV);
     

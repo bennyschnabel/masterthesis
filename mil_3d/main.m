@@ -13,7 +13,7 @@ clc; clear all; close all;
 % Image file name ()
 imageFileName = 'Knochenprobe2_1mm_1.mat';
 % Number of randomly generated angles (positiv integer, minimum 9, )
-numberOfDifferentAngles = 50;
+numberOfDifferentAngles = 250;
 % Distance between two created lines (positiv integer)
 increment = 5;
 
