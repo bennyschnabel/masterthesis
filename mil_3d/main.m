@@ -1,5 +1,5 @@
 clc; clear all; close all;
-
+tic
 % Implementation for calculating the MIL tensor in 3D
 %
 % Abbreviations used:
@@ -12,10 +12,10 @@ clc; clear all; close all;
 
 % Image file name ()
 imageFileName = 'Knochenprobe2_1mm_1.mat';
-% Number of randomly generated angles (positiv integer, minimum 9, )
-numberOfDifferentAngles = 2;
+% Number of randomly generated orientation (positiv integer, minimum 9)
+numberOfOrientations = 1000;
 % Distance between two created lines (positiv integer)
-increment = 5;
+increment = 1;
 
 %% Check if Matlab or GNU Octave
 
@@ -40,11 +40,11 @@ I = cell2mat(struct2cell(load(imageFileName)));
 
 %% File names creation
 
-fileName = [imageFileName(1:end-4), '_', num2str(numberOfDifferentAngles), '.csv'];
+fileName = [imageFileName(1:end-4), '_', num2str(numberOfOrientations), '.csv'];
 
 %% Loop to calculate the value MIL(theta) 
 
-for kk = 1 : 1 : numberOfDifferentAngles
+for kk = 1 : 1 : numberOfOrientations
     % Spherical coordinates, generate direction vector
     theta = deg2rad(180*rand(1,1));
     phi = deg2rad(360*rand(1,1));
@@ -57,7 +57,7 @@ for kk = 1 : 1 : numberOfDifferentAngles
     
     [MIL] = calculate_mil_3d(n, r, c, p, increment, I);
     
-    dispString = ['kk: ', num2str(kk), '/', num2str(numberOfDifferentAngles), ...
+    dispString = ['kk: ', num2str(kk), '/', num2str(numberOfOrientations), ...
         ', theta = ', num2str(round(rad2deg(theta), 1)), ...
         ', phi = ', num2str(round(rad2deg(phi), 1)), ...
         ', MIL = ', num2str(round(MIL, 1))];
@@ -79,3 +79,4 @@ end
 %% Degree of anisotropy
 
 [DA] = degree_of_anisotropy(radii);
+toc

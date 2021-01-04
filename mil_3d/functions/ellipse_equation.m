@@ -33,8 +33,8 @@ M = [v(1), v(2), v(3); v(4), v(5), v(6); v(7), v(8), v(9)];
 %% Plot
 
 figure()
-for ii = 1 : 1 : 20
-plot3([0 x(ii)], [0 y(ii)], [0 z(ii)], '-', 'Color', [color1(1), color2(1), color3(1)])
+for ii = 1 : 1 : length(x)
+plot3([0 x(ii)], [0 y(ii)], [0 z(ii)], '.', 'Color', [color1(1), color2(1), color3(1)])
 hold on
 end
 
