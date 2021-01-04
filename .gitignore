@@ -1,6 +1,7 @@
 # Ignore
 results/
 **/results
+**/bonej
 results/**
 evaluation/*
 export_mil.csv

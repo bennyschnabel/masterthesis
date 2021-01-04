@@ -357,6 +357,7 @@ else
     % Fourth corner point of the plane O
     O4 = round(Q4 + fac * n180);
     
+    % Generate meshgrid
     [x1Q12,x2Q12,x3Q12] = bresenham_3d(Q1, Q2);
     [x1Q34,x2Q34,x3Q34] = bresenham_3d(Q3, Q4);
     [x1O12,x2O12,x3O12] = bresenham_3d(O1, O2);

@@ -1,4 +1,4 @@
-function ellipse_equation(fileName)
+function [radii] = ellipse_equation(fileName)
 
 [color1, color2, color3] = import_custom_colors();
 importData = table2array(readtable(fileName));

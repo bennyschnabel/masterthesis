@@ -1,7 +1,7 @@
 clc; clear all; close all;
 
 % Image file name
-imageFileName = 'Knochenprobe2_5mm_1.mat';
+imageFileName = 'Knochenprobe2_1mm_1.mat';
 
 I = cell2mat(struct2cell(load(imageFileName)));
 [r, c, p] = size(I);

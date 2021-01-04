@@ -13,7 +13,7 @@ clc; clear all; close all;
 % Image file name ()
 imageFileName = 'Knochenprobe2_1mm_1.mat';
 % Number of randomly generated angles (positiv integer, minimum 9, )
-numberOfDifferentAngles = 250;
+numberOfDifferentAngles = 2;
 % Distance between two created lines (positiv integer)
 increment = 5;
 
@@ -60,7 +60,7 @@ for kk = 1 : 1 : numberOfDifferentAngles
     dispString = ['kk: ', num2str(kk), '/', num2str(numberOfDifferentAngles), ...
         ', theta = ', num2str(round(rad2deg(theta), 1)), ...
         ', phi = ', num2str(round(rad2deg(phi), 1)), ...
-        ', MIL = ', num2str(MIL)];
+        ', MIL = ', num2str(round(MIL, 1))];
     disp(dispString)
     
     exportData = [MIL, theta, phi];
@@ -69,9 +69,13 @@ end
 
 %% Calculate ellipsoid
 
-ellipse_equation(fileName);
+[radii] = ellipse_equation(fileName);
 
 %% Calculate MIL tensor M and fabric tensor H
 
 %[M] = mil_tensor(beta1, beta2, phi);
 %[H] = fabric_tensor(M);
+
+%% Degree of anisotropy
+
+[DA] = degree_of_anisotropy(radii);
