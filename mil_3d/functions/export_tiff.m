@@ -3,7 +3,7 @@ clc; clear all; close all;
 %% User Input
 
 % Image file name
-imageFileName = 'Knochenprobe2_5mm_1.mat';
+imageFileName = 'Knochenprobe2_5mm_1_fliped.mat';
 % Export as single tiff files or tiff stream [single, stream]
 exportType = 'stream';
 

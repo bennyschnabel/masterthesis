@@ -1,4 +1,4 @@
-function [MIL] = calculate_mil_3d(n, r, c, p, inc, I)
+function [MIL] = calculate_mil_3d_old(n, r, c, p, inc, I)
 % CALCULATE_MIL_3D Calculation of the MIL values
 %
 %   [MIL] = CALCULATE_MIL_3D(n, r, c, p, inc, I)
@@ -326,22 +326,23 @@ else
     dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
     % First corner point of the plane Q
     Q1 = round(PS + fac * dV);
-    
-    Q11 = [Q1(1); Q1(2); Q1(3); 1];
-    
-    Q21 = rot3axis(PM, n, pi/2) * Q11;
-    Q2 = round([Q21(1); Q21(2); Q21(3)]);
-    dV = (1 / norm(Q2 - PS)) * (Q2 - PS);
+    % Second directional vector (direction 0, 1)
+    dV = [0; 1; (-n(1) * 0 - n(2) * 1) / (n(3))];
+    % Normalize directional vector
+    dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
+    % Second corner point of the plane Q
     Q2 = round(PS + fac * dV);
-    
-    Q31 = rot3axis(PM, n, pi) * Q11;
-    Q3 = round([Q31(1); Q31(2); Q31(3)]);
-    dV = (1 / norm(Q3 - PS)) * (Q3 - PS);
+    % Third directional vector (direction 0, -1)
+    dV = [0; -1; (-n(1) * 0 - n(2) * -1) / (n(3))];
+    % Normalize directional vector
+    dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
+    % Third corner point of the plane Q
     Q3 = round(PS + fac * dV);
-    
-    Q41 = rot3axis(PM, n, (3/2) * pi) * Q11;
-    Q4 = round([Q41(1); Q41(2); Q41(3)]);
-    dV = (1 / norm(Q4 - PS)) * (Q4 - PS);
+    % Fourth directional vector (direction -1, 0)
+    dV = [-1; 0; (-n(1) * -1 - n(2) * 0) / (n(3))];
+    % Normalize directional vector
+    dV = (1 / abs(sqrt(dV(1)^2 + dV(2)^2 + dV(3)^2))) * dV;
+    % Fourth corner point of the plane Q
     Q4 = round(PS + fac * dV);
     
     % TODO scale of the directional vector
@@ -363,13 +364,11 @@ else
     [x1O12,x2O12,x3O12] = bresenham_3d(O1, O2);
     [x1O34,x2O34,x3O34] = bresenham_3d(O3, O4);
     
-    l = min([length(x1Q12); length(x1Q34); length(x1O12); length(x1O34)]);
-    
-    for kk = 1 : 1 : (l - 1)
+    for kk = 1 : 1 : length(x1Q12)
         q12 = [x1Q12(kk); x2Q12(kk); x3Q12(kk)];
-        q34 = [x1Q34(l - kk); x2Q34(l - kk); x3Q34(l - kk)];
+        q34 = [x1Q34(kk); x2Q34(kk); x3Q34(kk)];
         o12 = [x1O12(kk); x2O12(kk); x3O12(kk)];
-        o34 = [x1O34(l - kk); x2O34(l - kk); x3O34(l - kk)];
+        o34 = [x1O34(kk); x2O34(kk); x3O34(kk)];
         
         [x1q,x2q,x3q] = bresenham_3d(q12, q34);
         [x1o,x2o,x3o] = bresenham_3d(o12, o34);

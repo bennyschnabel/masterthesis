@@ -13,7 +13,7 @@ tic
 % Image file name ()
 imageFileName = 'Knochenprobe2_1mm_1.mat';
 % Number of randomly generated orientation (positiv integer, minimum 9)
-numberOfOrientations = 1000;
+numberOfOrientations = 2000;
 % Distance between two created lines (positiv integer)
 increment = 1;
 

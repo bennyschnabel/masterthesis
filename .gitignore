@@ -22,3 +22,6 @@ mil_3d/test3.m
 !Knochenprobe2_1mm_1.mat
 !Knochenprobe2.mat
 mil_3d/test4.m
+mil_3d/main_test.m
+mil_3d/test/calculate_mil_3d_test.m
+mil_3d/test5.m
