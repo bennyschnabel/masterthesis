@@ -199,7 +199,3 @@ if abs( v(end) ) > 1e-6
 else
     v = -sign( v(end) ) * v;
 end
-
-
-
-
