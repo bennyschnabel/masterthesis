@@ -25,3 +25,10 @@ mil_3d/test4.m
 mil_3d/main_test.m
 mil_3d/test/calculate_mil_3d_test.m
 mil_3d/test5.m
+mil_3d/degree_of_anisotropy.tex
+mil_3d/bw_grid_1mm_rand.fig
+mil_3d/test6.m
+mil_3d/evaluation.m
+mil_3d/evaluation/mittelwert.m
+mil_3d/evaluation/varianz.m
+mil_3d/evaluation/wahrscheinlichkeitsdichte.m

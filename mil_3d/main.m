@@ -13,9 +13,11 @@ tic
 % Image file name ()
 imageFileName = 'Knochenprobe2_1mm_1.mat';
 % Number of randomly generated orientation (positiv integer, minimum 9)
-numberOfOrientations = 2000;
+numberOfOrientations = 3;
 % Distance between two created lines (positiv integer)
 increment = 1;
+% Number of repetitions
+numberOfRepetitions = 1;
 
 %% Check if Matlab or GNU Octave
 
@@ -40,7 +42,10 @@ I = cell2mat(struct2cell(load(imageFileName)));
 
 %% File names creation
 
-fileName = [imageFileName(1:end-4), '_', num2str(numberOfOrientations), '.csv'];
+for ll = 1 : 1 : numberOfRepetitions
+
+fileName = [imageFileName(1:end-4), '_', num2str(numberOfOrientations), ...
+    '_', datestr(now,'yy_mm_dd_HH_MM_SS'), '.csv'];
 
 %% Loop to calculate the value MIL(theta) 
 
@@ -54,17 +59,18 @@ for kk = 1 : 1 : numberOfOrientations
     [x, y, z] = sc2cc(ra, theta, phi);
     P1 = [x; y; z];
     n = round(1 / norm(P1 - P0) * (P1 - P0), 4);
-    
+
     [MIL] = calculate_mil_3d(n, r, c, p, increment, I);
-    
+
     dispString = ['kk: ', num2str(kk), '/', num2str(numberOfOrientations), ...
         ', theta = ', num2str(round(rad2deg(theta), 1)), ...
         ', phi = ', num2str(round(rad2deg(phi), 1)), ...
         ', MIL = ', num2str(round(MIL, 1))];
     disp(dispString)
-    
+
     exportData = [MIL, theta, phi];
     dlmwrite(fileName, exportData, '-append');
+end
 end
 
 %% Calculate ellipsoid

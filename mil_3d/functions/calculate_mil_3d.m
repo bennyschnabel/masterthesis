@@ -444,7 +444,7 @@ switch dispFigure
         zlabel('x_{3}')
         grid on
         
-        exportgraphics(gcf, 'mil_3d_bw_grid_4.png', 'Resolution',300)
+        exportgraphics(gcf, 'mil_3d_bw_grid_2.png', 'Resolution',300)
     case 'false'
         disp('')
     otherwise
