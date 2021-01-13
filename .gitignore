@@ -41,3 +41,6 @@ mil_3d_fortran/sc2cc.f90
 mil_3d_fortran/test.exe
 mil_3d_fortran/test.f90
 mil_3d_fortran/main.exe
+mil_3d/result_bonej.xlsx
+mil_3d_fortran/mathvec.exe
+mil_3d_fortran/mathvec.f90

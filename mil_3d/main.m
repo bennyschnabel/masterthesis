@@ -13,11 +13,11 @@ tic
 % Image file name ()
 imageFileName = 'Knochenprobe2_1mm_1.mat';
 % Number of randomly generated orientation (positiv integer, minimum 9)
-numberOfOrientations = 3;
+numberOfOrientations = 3000;
 % Distance between two created lines (positiv integer)
 increment = 1;
 % Number of repetitions
-numberOfRepetitions = 1;
+numberOfRepetitions = 2;
 
 %% Check if Matlab or GNU Octave
 
