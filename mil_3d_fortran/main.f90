@@ -4,27 +4,27 @@ program main
 	integer, parameter :: out_unit=20
 	integer :: numberOfOrientations, increment, ii
 	real, parameter :: pi = 3.141593, r = 1
-	real, dimension(3) :: p0, p1, n
+	real, dimension(3,1) :: p0, p1, n
 	real :: theta, phi, thetaR, phiR, calculate_mil_3d, MIL
-	
+
 	! Number of randomly generated orientation (positiv integer, minimum 9)
-	numberOfOrientations = 2000
+	numberOfOrientations = 1
 	! Distance between two created lines (positiv integer)
 	increment = 1
 	
 	do ii = 1, numberOfOrientations
 		call random_number(thetaR)
-		theta = thetaR * pi
-		!theta = pi / 4
+		!theta = thetaR * pi
+		theta = pi / 4
 		call random_number(phiR)
-		phi = phiR * 2 * pi
-		!phi = pi / 2
+		!phi = phiR * 2 * pi
+		phi = pi / 2
 		! Origin
-		p0 = (/0, 0, 0 /)
+		p0 = reshape((/0, 0, 0 /), (/ 3, 1 /))
 		! Spherical coordinates to Cartesian coordinates
-		p1(1) = r * sin(theta) * cos(phi)
-		p1(2) = r * sin(theta) * sin(phi)
-		p1(3) = r * cos(theta)
+		p1(1,1) = r * sin(theta) * cos(phi)
+		p1(2,1) = r * sin(theta) * sin(phi)
+		p1(3,1) = r * cos(theta)
 		
 		n = (1 / sqrt(sum((p1 - p0)**2))) * (p1 - p0)
 		write(*,*) 'ii: ',ii , '/ ', numberOfOrientations
@@ -43,14 +43,19 @@ function calculate_mil_3d(n, a, b, c)
 			real :: phi
 			real, dimension(4,4) :: rot
 		end function
+		
+		function bresenham(P1, P2) result(XR1)
+			integer, dimension(3,1), intent(in) :: P1, P2
+			integer, dimension(:), allocatable :: XR1
+		end function
 	end interface
 	
-	!integer :: 
 	integer, dimension(3,1) :: ps, pQ1, pQ2, pQ3, pQ4, pO1, pO2, pO3, pO4
     real :: calculate_mil_3d, h, cv, dr, ru, a, b, c
 	real, parameter :: pi = 3.141593
 	real, dimension(4, 1) :: pQ14, pQ24, pQ34, pQ44
-	real, dimension(3, 1) :: n, pr1, pr2, m, v0
+	real, dimension(3, 1) :: n, m, v0
+	integer, dimension(:), allocatable :: x1
 	
 	h = 0.0
 	cv = 0.0
@@ -75,23 +80,27 @@ function calculate_mil_3d(n, a, b, c)
 		v0 = (1 / sqrt(sum(v0**2))) * v0
 		write(*,*) 'v0: ', v0
 		
+		! Boundary point 1 on the plane Q
 		pQ1 = nint(ps + ru * v0)
 		pQ14 = reshape((/ real(pQ1(1,1)), real(pQ1(2,1)), real(pQ1(3,1)), 1.0 /), (/ 4,1 /))
 		write(*,*) 'pQ1: ', pQ1
 		
+		! Boundary point 2 on the plane Q
 		pQ24 = matmul(rot3axis(m, n, pi/2), pQ14)
-		pQ2 = reshape((/ pQ24(1,1), pQ24(2,1), pQ24(3,1) /), (/ 3,1 /))
+		pQ2 = reshape(nint((/ pQ24(1,1), pQ24(2,1), pQ24(3,1) /)), (/ 3,1 /))
 		write(*,*) 'pQ2: ', pQ2
 		
+		! Boundary point 3 on the plane Q
 		pQ34 = matmul(rot3axis(m, n, pi), pQ14)
-		pQ3 = reshape((/ pQ34(1,1), pQ34(2,1), pQ34(3,1) /), (/ 3,1 /))
+		pQ3 = reshape(nint((/ pQ34(1,1), pQ34(2,1), pQ34(3,1) /)), (/ 3,1 /))
 		write(*,*) 'pQ3: ', pQ3
 		
+		! Boundary point 4 on the plane Q
 		pQ44 = matmul(rot3axis(m, n, (3 * pi) / 2), pQ14)
-		pQ4 = reshape((/ pQ44(1,1), pQ44(2,1), pQ44(3,1) /), (/ 3,1 /))
+		pQ4 = reshape(nint((/ pQ44(1,1), pQ44(2,1), pQ44(3,1) /)), (/ 3,1 /))
 		write(*,*) 'pQ4: ', pQ4
 		
-		pO1 = pQ1 - dr * n
+		pO1 = pQ1 - nint(dr * n)
 		write(*,*) 'pO1: ', pO1
 		
 		pO2 = pQ2 - dr * n
@@ -102,6 +111,8 @@ function calculate_mil_3d(n, a, b, c)
 		
 		pO4 = pQ4 - dr * n
 		write(*,*) 'pO4: ', pO4
+		
+		x1 = bresenham(pQ1, pQ2)
 	end if
 
     calculate_mil_3d = h / cv
@@ -155,7 +166,6 @@ function rot3axis(a, b, phi) result (rot)
 		
 	end interface
 	
-	integer :: ii, jj
 	real, dimension(3,1), intent(in) :: a, b
 	real :: phi, d
 	real, dimension(4,4) :: rot, Tp, Tn, Rx2p, Rx2n, Rx3p, Rx3n, Rx3
@@ -163,26 +173,12 @@ function rot3axis(a, b, phi) result (rot)
 	d = sqrt(b(1,1)**2 + b(2,1)**2)
 	
 	Tp = translation_matrix_positiv(a)
-	!write(*,*) 'Tp'
-	!write(*,*) Tp
 	Tn = translation_matrix_negativ(a)
-	!write(*,*) 'Tn'
-	!write(*,*) Tn
 	Rx2p = rotation_matrix_x2_positiv(b, d)
-	!write(*,*) 'Rx2p'
-	!write(*,*) Rx2p
 	Rx2n = rotation_matrix_x2_negativ(b, d)
-	!write(*,*) 'Rx2n'
-	!write(*,*) Rx2n
 	Rx3p = rotation_matrix_x3_positiv(b, d)
-	!write(*,*) 'Rx3p'
-	!write(*,*) Rx3p
 	Rx3n = rotation_matrix_x3_negativ(b, d)
-	!write(*,*) 'Rx3n'
-	!write(*,*) Rx3n
 	Rx3 = rotation_matrix_x3(phi)
-	!write(*,*) 'Rx3'
-	!write(*,*) Rx3
 	
 	rot = matmul(matmul(matmul(Tp,Rx3p), matmul(Rx2p, Rx3)), matmul(matmul(Rx2n, Rx3n), Tn))
 end function rot3axis
@@ -328,3 +324,91 @@ function rotation_matrix_x3(alpha) result(R)
 	R(2,1) = sin(alpha)
 	R(2,2) = cos(alpha)
 end function rotation_matrix_x3
+
+function bresenham(P1, P2) result(XR1)
+	implicit none
+	
+	integer :: ii, d, x1, y1, z1, x2, y2, z2, dx, dy, dz, ax, ay, az, sx, sy, sz, x, y, z, idx
+	integer, dimension(3,1), intent(in) :: P1, P2
+	! Todo
+	integer, dimension(:), allocatable :: XR1, XR2, XR3
+	
+	real :: xd, yd, zd
+	
+	d = maxval(abs(P2 - P1))
+	write(*,*) 'd', d
+	
+	! allocate memory 
+	allocate(XR1(d))
+	allocate(XR2(d))
+	allocate(XR3(d))
+	
+	do ii = 1, d
+		XR1(ii) = 0
+	end do
+	write(*,*) 'X1', X1
+	XR2 = XR1
+	XR3 = XR1
+	
+	x1 = P1(1,1)
+	y1 = P1(2,1)
+	z1 = P1(3,1)
+	x2 = P2(1,1)
+	y2 = P2(2,1)
+	z2 = P2(3,1)
+	dx = x2 - x1
+	write(*,*) 'dx', dx
+	dy = y2 - y1
+	write(*,*) 'dy', dy
+	dz = z2 - z1
+	write(*,*) 'dz', dz
+	ax = abs(dx) * 2
+	write(*,*) 'ax', ax
+	ay = abs(dy) * 2
+	write(*,*) 'ay', ay
+	az = abs(dz) * 2
+	write(*,*) 'az', az
+	sx = sign(1, dx)
+	write(*,*) 'sx', sx
+	sy = sign(1, dy)
+	write(*,*) 'sy', sy
+	sz = sign(1, dz)
+	write(*,*) 'sz', sz
+	x = x1
+	y = y1
+	z = z1
+	idx = 1
+	
+	if (ax >= max(ay, az)) then
+		! x1 dominant
+		write(*,*) 'ax', ax, 'max(ay, az)', max(ay, az)
+		yd = ay - (ax / 2)
+		zd = az - (ax / 2)
+		do while(.true.)
+			XR1(idx) = x
+			XR2(idx) = y
+			XR3(idx) = z
+			idx = idx + 1
+			if (x == x2) exit
+			if (yd >= 0) then
+				y = y + sy
+				yd = yd - ax
+			end if
+			if (zd >= 0) then
+				z = z + sz
+				zd = zd - ax
+			end if
+			x = x + sx
+			yd = yd + ay
+			zd = zd + az
+		end do
+	else if (ay >= max(ax, az)) then
+		! x2 dominant
+		write(*,*) 'ay'
+	else if (az >= max(ax, ay)) then
+		! x3 dominant
+		write(*,*) 'az'
+	end if
+	write(*,*) 'XR1', XR1
+	
+end function bresenham
