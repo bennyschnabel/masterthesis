@@ -7,11 +7,11 @@ imageFileName = 'Knochenprobe2.int1.stream.tiff';
 % DPI value of the image
 dpi = 1814;
 % Side length of the square/ cube created from the image [mm]
-length = 5;
+length = 1;
 % Select start image from stack (eg. '2' for second image in stack)
 startImage = 1;
-% Select if 2D or 3D or mat [2d, 3d, mat]
-plotType = 'mat';
+% Select if 2D or 3D or mat [2d, 3d, mat, vtk]
+plotType = 'vtk';
 % Resolution of the export [dpi]
 resolution = 300;
 % Select if original or binary [original, binary]
@@ -134,6 +134,13 @@ switch plotType
                     'mm_', num2str(startImage), '.mat'];
                 
         save(matFileName,'I_ROIBW')
+    case {'vtk', 'VTK'}
+        I_ROIBW = I(xl:xu,xl:xu,startImage:va);
+        
+        vtkFileName = [fileNameCropped, '_', num2str(length), ...
+                    'mm_', num2str(startImage), '.vtk'];
+        
+        WriteToVTK(I_ROIBW, vtkFileName)
     otherwise
         warning('Unexpected plot type. No plot created.')
 end

@@ -44,3 +44,9 @@ mil_3d_fortran/main.exe
 mil_3d/result_bonej.xlsx
 mil_3d_fortran/mathvec.exe
 mil_3d_fortran/mathvec.f90
+mil_3d/evaluation_da.m
+mil_3d/evaluation_radii.m
+mil_3d/import_dat.m
+mil_3d_fortran/bresenham.f90
+*.dat
+mil_3d_fortran/test1.f90

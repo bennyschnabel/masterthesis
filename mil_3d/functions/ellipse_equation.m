@@ -1,11 +1,24 @@
 function [radii] = ellipse_equation(fileName)
 
 [color1, color2, color3] = import_custom_colors();
-importData = table2array(readtable(fileName));
 
-MIL = importData(:,1);
-theta = importData(:,2);
-phi = importData(:,3);
+% 
+[fPath, fName, fExt] = fileparts(fileName);
+
+switch lower(fExt)
+  case '.csv'
+    importData = table2array(readtable(fileName));
+    MIL = importData(:,1);
+    theta = importData(:,2);
+    phi = importData(:,3);
+  case '.dat'
+    importData = importdata(fileName);
+    MIL = importData(:,3);
+    theta = importData(:,1);
+    phi = importData(:,2);
+  otherwise  % Under all circumstances SWITCH gets an OTHERWISE!
+    error('Unexpected file extension: %s', fExt);
+end
 
 x = zeros(length(MIL), 1);
 y = x;

@@ -13,11 +13,11 @@ tic
 % Image file name ()
 imageFileName = 'Knochenprobe2_1mm_1.mat';
 % Number of randomly generated orientation (positiv integer, minimum 9)
-numberOfOrientations = 1;
+numberOfOrientations = 200;
 % Distance between two created lines (positiv integer)
 increment = 1;
 % Number of repetitions
-numberOfRepetitions = 2;
+numberOfRepetitions = 10;
 
 %% Check if Matlab or GNU Octave
 
@@ -52,9 +52,7 @@ fileName = [imageFileName(1:end-4), '_', num2str(numberOfOrientations), ...
 for kk = 1 : 1 : numberOfOrientations
     % Spherical coordinates, generate direction vector
     theta = deg2rad(180*rand(1,1));
-    theta = pi/4;
     phi = deg2rad(360*rand(1,1));
-    phi = pi/2;
     ra = 1;
 
     P0 = [0; 0; 0];

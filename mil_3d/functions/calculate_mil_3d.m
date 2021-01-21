@@ -13,7 +13,7 @@ function [MIL] = calculate_mil_3d(n, r, c, p, inc, I)
 % P = [r, c, p];
 dispFigure = 'false';
 
-Ctau = 0;
+cv = 0;
 h = 0;
 
 if round(n(1), 3) == 1 && round(n(2), 3) == 0 && round(n(3), 3) == 0
@@ -40,7 +40,7 @@ if round(n(1), 3) == 1 && round(n(2), 3) == 0 && round(n(3), 3) == 0
                     
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                             x_plot(ii) = x(ii);
                             y_plot(ii) = y(ii);
                             z_plot(ii) = z(ii);
@@ -56,7 +56,7 @@ if round(n(1), 3) == 1 && round(n(2), 3) == 0 && round(n(3), 3) == 0
                 case 'false'
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                         end
                     end
                 otherwise
@@ -88,7 +88,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == 1 && round(n(3), 3) == 0
                     
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                             x_plot(ii) = x(ii);
                             y_plot(ii) = y(ii);
                             z_plot(ii) = z(ii);
@@ -104,7 +104,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == 1 && round(n(3), 3) == 0
                 case 'false'
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                         end
                     end
                 otherwise
@@ -136,7 +136,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == 0 && round(n(3), 3) == 1
                     
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                             x_plot(ii) = x(ii);
                             y_plot(ii) = y(ii);
                             z_plot(ii) = z(ii);
@@ -152,7 +152,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == 0 && round(n(3), 3) == 1
                 case 'false'
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                         end
                     end
                 otherwise
@@ -184,7 +184,7 @@ elseif round(n(1), 3) == -1 && round(n(2), 3) == 0 && round(n(3), 3) == 0
                     
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                             x_plot(ii) = x(ii);
                             y_plot(ii) = y(ii);
                             z_plot(ii) = z(ii);
@@ -200,7 +200,7 @@ elseif round(n(1), 3) == -1 && round(n(2), 3) == 0 && round(n(3), 3) == 0
                 case 'false'
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                         end
                     end
                 otherwise
@@ -232,7 +232,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == -1 && round(n(3), 3) == 0
                     
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                             x_plot(ii) = x(ii);
                             y_plot(ii) = y(ii);
                             z_plot(ii) = z(ii);
@@ -248,7 +248,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == -1 && round(n(3), 3) == 0
                 case 'false'
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                         end
                     end
                 otherwise
@@ -280,7 +280,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == 0 && round(n(3), 3) == -1
                     
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                             x_plot(ii) = x(ii);
                             y_plot(ii) = y(ii);
                             z_plot(ii) = z(ii);
@@ -296,7 +296,7 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == 0 && round(n(3), 3) == -1
                 case 'false'
                     for ii = 1 : length(x) - 1
                         if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                            Ctau = Ctau + 1;
+                            cv = cv + 1;
                         end
                     end
                 otherwise
@@ -306,9 +306,10 @@ elseif round(n(1), 3) == 0 && round(n(2), 3) == 0 && round(n(3), 3) == -1
     end
 else
     % Room diagonal
-    dR = norm([1;c;p] - [r;1;1]);
+    %dR = norm([1;c;p] - [r;1;1]);
+    dR = sqrt(r^2 + c^2 + p^2);
     % Radius of the sphere (Half room diagonal plus one)
-    dR2 = dR / 2 + 1;
+    dR2 = dR / 2;
     % Origin of the sphere (center of the read data)
     PM = [r/2; c/2; p/2];
     % Point on the sphere in direction n
@@ -388,7 +389,7 @@ else
                     indizes = [indizes, mm];
                 end
             end
-            
+
             if counter > 2
                 SP = [x1(indizes(1)); x2(indizes(1)); x3(indizes(1))];
                 EP = [x1(indizes(end)); x2(indizes(end)); x3(indizes(end))];
@@ -409,7 +410,7 @@ else
 
                         for ii = 1 : length(x) - 1
                             if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                                Ctau = Ctau + 1;
+                                cv = cv + 1;
                                 x_plot(ii) = x(ii);
                                 y_plot(ii) = y(ii);
                                 z_plot(ii) = z(ii);
@@ -418,14 +419,13 @@ else
 
                         figure(99)
                         plot3(x_plot, y_plot, z_plot, 'kx')
-                        axis([0 r 0 c 0 p])
-                        %pause(0.1)
+                        axis([0 r 0 c 0 p])                        %pause(0.1)
                         hold on
 
                     case 'false'
                         for ii = 1 : length(x) - 1
                             if I(x(ii), y(ii), z(ii)) == 0 && I(x(ii + 1), y(ii + 1), z(ii + 1)) == 1
-                                Ctau = Ctau + 1;
+                                cv = cv + 1;
                             end
                         end
                     otherwise
@@ -451,6 +451,6 @@ switch dispFigure
         warning('Todo')
 end
 
-MIL = h / Ctau;
+MIL = h / cv;
 
 end
