@@ -6,7 +6,13 @@ function [H] = fabric_tensor(M)
 %   [H] = FABRIC_TENSOR(M)
 %   M ... MIL tensor
 
-H = M^(-1/2);
+[v,D] = eig(inv(M));
+
+D = sqrt(D);
+
+H = v * D * v';
+
+%H = M^(-1/2);
 
 try chol(H);
     disp('Fabric tensor H is symmetric positive definite.')

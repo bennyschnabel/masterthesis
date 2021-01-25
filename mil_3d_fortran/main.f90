@@ -866,13 +866,13 @@ SUBROUTINE mil_tensor(fileName)
 	
 	CHARACTER(len = 10)						:: dummy
 	CHARACTER(len=100), INTENT(IN)			:: fileName
-	INTEGER									:: status, n, ii
+	INTEGER									:: status, n, ii, jj
 	INTEGER, PARAMETER						:: q = 13
 	REAL, PARAMETER							:: abserr = 1.0e-09
 	REAL, DIMENSION(3)						:: center, evals
 	REAL, DIMENSION(9)						:: u
 	REAL, DIMENSION(10)						:: v
-	REAL, DIMENSION(3,3)					:: eig, evecs, M, H
+	REAL, DIMENSION(3,3)					:: eig, evecs, M, Minv, eig2, evecs2, H, D05
 	REAL, DIMENSION(4,4)					:: A, T, R
 	REAL, DIMENSION(:), ALLOCATABLE			:: theta, phi, mil, x1, x2, x3, d2
 	REAL, DIMENSION(:,:), ALLOCATABLE		:: D
@@ -940,11 +940,8 @@ SUBROUTINE mil_tensor(fileName)
 	T = 0
 	FORALL(ii = 1 : 4) T(ii,ii) = 1
 	T(4, 1:3) = center(1:3)
-	!WRITE(*,*) T
+
 	R = MATMUL(MATMUL(T, A), TRANSPOSE(T))
-	!WRITE(*,*) R
-	
-	!WRITE(*,*) R(1:3, 1:3) / (-R(4,4))
 	
 	eig = R(1:3, 1:3) / (-R(4,4))
 		
@@ -961,16 +958,34 @@ SUBROUTINE mil_tensor(fileName)
 		v = -v / v(10)
 	END IF
 		
-	WRITE(*,*) '-----------------'
+	! Calculate MIL tensor M
 	
 	M = RESHAPE((/ v(1), v(4), v(5), v(4), v(2), v(6), v(5), v(6), v(3) /), (/ 3, 3/))
 	
+	WRITE(*,*) '-------Results-------'
 	WRITE(*,*) 'MIL tensor M: '
 	DO ii = 1, SIZE(M, 1)
 		WRITE(*,'(20G12.4)') M(ii,:)
 	END DO
 	
-	H = M**(-1/2)
+	! Calculate fabric tensor F
+	CALL inverse(M, Minv, 3)
+
+	! Important to get a 'symmetric matric' for jacobi algorithm
+	eig2 =  nint(Minv * 1000.0) / 1000.0
+	
+	CALL jacobi(eig2, evecs2, abserr, 3)
+	
+	DO ii = 1, 3
+		DO jj = 1,3
+			D05(ii, jj) = 0
+			IF (ii == jj) THEN
+				D05(ii, jj) = sqrt(eig2(ii, jj))
+			END IF
+		END DO
+	END DO
+	 
+	H = MATMUL(MATMUL(evecs2, D05), TRANSPOSE(evecs2))
 	
 	WRITE(*,*) 'Fabric tensor H: '
 	DO ii = 1, SIZE(H, 1)
@@ -1142,3 +1157,83 @@ SUBROUTINE jacobi(a,x,abserr,n)
 	END DO
 	RETURN
 END SUBROUTINE jacobi
+
+SUBROUTINE inverse(a,c,n)
+!============================================================
+! Inverse matrix
+! Method: Based on DOolittle LU factorization for Ax=b
+! Alex G. December 2009
+!-----------------------------------------------------------
+! input ...
+! a(n,n) - array of coefficients for matrix A
+! n      - dimension
+! output ...
+! c(n,n) - inverse matrix of A
+! comments ...
+! the original matrix a(n,n) will be destroyed 
+! during the calculation
+!===========================================================
+IMPLICIT NONE
+INTEGER				:: n
+REAL				:: a(n,n), c(n,n)
+REAL				:: L(n,n), U(n,n), b(n), d(n), x(n)
+REAL				:: coeff
+INTEGER				:: i, j, k
+
+! step 0: initialization for matrices L and U and b
+! Fortran 90/95 aloows such operations on matrices
+L=0.0
+U=0.0
+b=0.0
+
+! step 1: forward elimination
+DO k=1, n-1
+	DO i=k+1,n
+		coeff=a(i,k)/a(k,k)
+		L(i,k) = coeff
+		DO j=k+1,n
+			a(i,j) = a(i,j)-coeff*a(k,j)
+		END DO
+	END DO
+END DO
+
+! Step 2: prepare L and U matrices 
+! L matrix is a matrix of the elimination coefficient
+! + the diagonal elements are 1.0
+DO i=1,n
+	L(i,i) = 1.0
+END DO
+! U matrix is the upper triangular part of A
+DO j=1,n
+	DO i=1,j
+		U(i,j) = a(i,j)
+	END DO
+END DO
+
+! Step 3: compute columns of the inverse matrix C
+DO k=1,n
+	b(k)=1.0
+	d(1) = b(1)
+	! Step 3a: Solve Ld=b using the forward substitution
+	DO i=2,n
+		d(i)=b(i)
+		DO j=1,i-1
+			d(i) = d(i) - L(i,j)*d(j)
+		END DO
+	END DO
+	! Step 3b: Solve Ux=d using the back substitution
+	x(n)=d(n)/U(n,n)
+	DO i = n-1,1,-1
+		x(i) = d(i)
+		DO j=n,i+1,-1
+			x(i)=x(i)-U(i,j)*x(j)
+		END DO
+		x(i) = x(i)/u(i,i)
+	END DO
+	! Step 3c: fill the solutions x(n) into column k of C
+	DO i=1,n
+		c(i,k) = x(i)
+	END DO
+	b(k)=0.0
+END DO
+END SUBROUTINE inverse

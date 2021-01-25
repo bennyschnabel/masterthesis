@@ -19,7 +19,7 @@ increment = 1;
 % Number of repetitions (positiv integer)
 numberOfRepetitions = 1;
 % Show ellipsoid after calculation ('show' or 'hide')
-displayElliposid = 'show';
+displayElliposid = 'hide';
 
 %% Check if Matlab or GNU Octave
 
