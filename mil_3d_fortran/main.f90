@@ -47,9 +47,9 @@ PROGRAM main
 	!-----------------------
 	
 	! File name
-	fileName = 'Knochenprobe2_1mm_1.vtk'
+	fileName = 'Knochenprobe2_1.2mm_1.vtk'
 	! Number of randomly generated orientation (positiv integer, minimum 9)
-	numberOfOrientations = 1000
+	numberOfOrientations = 2000
 	! Number of repetitions (positiv integer)
 	numberOfRepetitions = 1
 	! Distance between two created lines (positiv integer) 
@@ -159,11 +159,6 @@ FUNCTION calculatemil(n, a, b, c, voxel)
 	
 	h = 0.0
 	cv = 0.0
-	
-	! TODO
-	!IF (n(1,1) == 1 .AND. n(2,1) == 0 .AND. n(3,1) == 0) THEN
-	!ELSE
-	
 	
 	! Room diagonal
 	!dr = SQRT(real(a)**2 + real(b)**2 + real(c)**2)
@@ -809,34 +804,24 @@ FUNCTION importVTK(fileName, a, b, c) RESULT(x)
 	
 	! 1
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 2
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 3
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 4
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 5
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 6
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 7
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 8
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 9
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	! 10
 	READ(9, '(A)') dummy
-	!WRITE(*,*) dummy
 	
 	ALLOCATE(x(a * b * c))
 		
@@ -845,8 +830,6 @@ FUNCTION importVTK(fileName, a, b, c) RESULT(x)
 		READ(9, '(I1,' // ADJUSTL(fmt) // '(2X, I1))') datas(:,ln)
 	END DO
 	x = RESHAPE((datas), (/ a * b * c /))
-	WRITE(*,*) SIZE(x)
-	!WRITE(*,*) x
 	CLOSE(9)
 END FUNCTION importVTK
 
