@@ -50,3 +50,9 @@ mil_3d/import_dat.m
 mil_3d_fortran/bresenham.f90
 *.dat
 mil_3d_fortran/test1.f90
+mil_3d_fortran/bresenham.exe
+*.tex
+*.exe
+mil_3d_fortran/test2.f90
+mil_3d/functions/ellipse_equation_test.m
+*.vtk

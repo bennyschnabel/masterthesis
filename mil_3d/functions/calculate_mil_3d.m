@@ -378,7 +378,6 @@ else
         for ll = 1 : 1 : length(x1q)
             q = [x1q(ll); x2q(ll); x3q(ll)];
             o = [x1o(ll); x2o(ll); x3o(ll)];
-            
             [x1, x2, x3] = bresenham_3d(q, o);
             counter = 0;
             indizes = [];
@@ -389,7 +388,6 @@ else
                     indizes = [indizes, mm];
                 end
             end
-
             if counter > 2
                 SP = [x1(indizes(1)); x2(indizes(1)); x3(indizes(1))];
                 EP = [x1(indizes(end)); x2(indizes(end)); x3(indizes(end))];

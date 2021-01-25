@@ -7,11 +7,11 @@ imageFileName = 'Knochenprobe2.int1.stream.tiff';
 % DPI value of the image
 dpi = 1814;
 % Side length of the square/ cube created from the image [mm]
-length = 1;
+length = 0.4;
 % Select start image from stack (eg. '2' for second image in stack)
 startImage = 1;
 % Select if 2D or 3D or mat [2d, 3d, mat, vtk]
-plotType = 'vtk';
+plotType = 'mat';
 % Resolution of the export [dpi]
 resolution = 300;
 % Select if original or binary [original, binary]

@@ -1,4 +1,4 @@
-function [v, radii] = ellipse_equation(fileName)
+function show_ellipsoid(fileName)
 
 [color1, color2, color3] = import_custom_colors();
 
@@ -28,17 +28,7 @@ for kk = 1 : 1 : length(x)
     [x(kk), y(kk), z(kk)] = sc2cc(MIL(kk), theta(kk), phi(kk));
 end
 
-[ center, radii, evecs, v, chi2 ] = ellipsoid_fit( [ x y z ], '' );
-fprintf( 'Ellipsoid center: %.5g %.5g %.5g\n', center );
-fprintf( 'Ellipsoid radii: %.5g %.5g %.5g\n', radii );
-fprintf( 'Ellipsoid evecs:\n' );
-fprintf( '%.5g %.5g %.5g\n%.5g %.5g %.5g\n%.5g %.5g %.5g\n', ...
-    evecs(1), evecs(2), evecs(3), evecs(4), evecs(5), evecs(6), evecs(7), evecs(8), evecs(9) );
-fprintf( 'Algebraic form:\n' );
-fprintf( '%.5g ', v );
-fprintf( '\nAverage deviation of the fit: %.5f\n', sqrt( chi2 / size( x, 1 ) ) );
-fprintf( '\n' );
-
+[ ~, radii, evecs, v, chi2 ] = ellipsoid_fit( [ x y z ], '' );
 
 %% Plot
 
