@@ -57,3 +57,7 @@ mil_3d_fortran/test2.f90
 mil_3d/functions/ellipse_equation_test.m
 *.vtk
 mil_3d_fortran/fort.13
+mil_3d/test9.m
+mil_3d/test7.m
+mil_3d/test10.m
+mil_3d/test8.m

@@ -11,9 +11,9 @@ tic
 %% User Input
 
 % Image file name ()
-imageFileName = 'Knochenprobe2_1mm_1.mat';
+imageFileName = 'Knochenprobe2_1.2mm_1.mat';
 % Number of randomly generated orientation (positiv integer, minimum 9)
-numberOfOrientations = 100;
+numberOfOrientations = 250;
 % Distance between two created lines (positiv integer)
 increment = 1;
 % Number of repetitions (positiv integer)

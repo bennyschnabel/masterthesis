@@ -1,4 +1,4 @@
-function [ center, radii, evecs, v, chi2 ] = ellipsoid_fit_new( X, equals )
+function [ center, radii, evecs, v, chi2 ] = ellipsoid_fit( X, equals )
 %
 % Fit an ellispoid/sphere/paraboloid/hyperboloid to a set of xyz data points:
 %
@@ -59,7 +59,7 @@ end
 if length( x ) < 5 && ( strcmp( equals, '0xy' ) || strcmp( equals, '0xz' ) )
    error( 'Must have at least 5 points to fit a unique oriented ellipsoid with two equal radii' );
 end
-if length( x ) < 4 && strcmp( equals, 'xyz' );
+if length( x ) < 4 && strcmp( equals, 'xyz' )
    error( 'Must have at least 4 points to fit a unique sphere' );
 end
 
