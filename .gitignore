@@ -61,3 +61,16 @@ mil_3d/test9.m
 mil_3d/test7.m
 mil_3d/test10.m
 mil_3d/test8.m
+*.o
+*.mod
+*.swp
+*.un~
+*.swp
+*.f90~
+mil_3d/test11.m
+mil_3d_fortran/x1
+mil_3d_fortran/x1þ
+*.swp
+*.swp
+mil_3d_fortran/.main.f90.swp
+mil_3d_fortran/.main.f90.swp

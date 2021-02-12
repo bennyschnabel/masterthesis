@@ -235,14 +235,23 @@ MODULE calculate_mil
                         mil = h / cv
                 END SUBROUTINE test
 
-                SUBROUTINE mil_fabric_tensor(fileName)
+                SUBROUTINE mil_fabric_tensor(fileNameExport, fileNameExportTensor, domainNo, fun1, fun2)
                 IMPLICIT NONE
 
+                ! External variables
+                CHARACTER(LEN = 100), INTENT(IN) :: fileNameExport
+                CHARACTER(LEN = 100), INTENT(IN) :: fileNameExportTensor
+                INTEGER(KIND = int64), INTENT(IN) :: domainNo
+                INTEGER(KIND = int64), INTENT(IN) :: fun1
+                INTEGER(KIND = int64), INTENT(IN) :: fun2
+
+                ! Internal variables
                 CHARACTER(LEN = 10) :: dummy
-                CHARACTER(LEN = 100) :: fileNameExport
-                CHARACTER(LEN = 100), INTENT(IN) :: fileName
+                CHARACTER(LEN = 100) :: formatString
+
                 INTEGER(KIND = int64) :: status, n, ii, jj
                 INTEGER(KIND = int64), PARAMETER :: q = 13
+
                 REAL(KIND = real64), PARAMETER :: abserr = 1.0e-09
                 REAL(KIND = real64), DIMENSION(3) :: center, evals
                 REAL(KIND = real64), DIMENSION(9) :: u
@@ -252,8 +261,8 @@ MODULE calculate_mil
                 REAL(KIND = real64), DIMENSION(:), ALLOCATABLE :: theta, phi, mil, x1, x2, x3, d2
                 REAL(KIND = real64), DIMENSION(:,:), ALLOCATABLE :: D
 
-                OPEN(UNIT=q, FILE=fileName, IOSTAT=status, STATUS='old')
-                READ(q,*) n
+                OPEN(UNIT=fun1, FILE=fileNameExport, IOSTAT=status, STATUS='old')
+                READ(fun1,*) n
 
                 ALLOCATE(theta(n))
                 ALLOCATE(phi(n))
@@ -263,13 +272,15 @@ MODULE calculate_mil
                 ALLOCATE(x3(n))
 
                 DO ii = 1, n
-                        READ(q, '(1f6.4,A1,1f6.4,A1,3f8.4)') theta(ii), dummy, phi(ii), dummy, mil(ii)
+                        READ(fun1, '(1f6.4,A1,1f6.4,A1,3f8.4)') theta(ii), dummy, phi(ii), dummy, mil(ii)
 
                         ! Convert from spherical coordinates to cartesian coordinates
                         x1(ii) = MIL(ii) * SIN(theta(ii)) * COS(phi(ii))
                         x2(ii) = MIL(ii) * SIN(theta(ii)) * SIN(phi(ii))
                         x3(ii) = MIL(ii) * COS(theta(ii))
                 END DO
+
+                CLOSE(fun1)
 
                 DEALLOCATE(theta)
                 DEALLOCATE(phi)
@@ -361,16 +372,17 @@ MODULE calculate_mil
                 DO ii = 1, SIZE(H, 1)
                         WRITE(*,'(20G12.4)') H(ii,:)
                 END DO
+                
+                OPEN(UNIT = fun2, FILE = fileNameExportTensor, IOSTAT = status, ACCESS = 'append')
+                formatString = '(I6, 9(A1, F11.5))'
 
-
-                fileNameExport = fileName(1:LEN_TRIM(fileName)-4) // '_M_H.dat'
-
-                OPEN(UNIT = 69, FILE = fileNameExport, IOSTAT = status)
-                WRITE(69,*) 'MIL tensor M: '
-                WRITE(69,'(3f12.7)') M
-                WRITE(69,*) 'Fabric tensor H: '
-                WRITE(69,'(3f12.7)') H
-                CLOSE(69)
+                WRITE(fun2,formatString) domainNo, ';', H(1,1), ';', H(1,2), ';', H(1,3), ';', H(2,1), ';', H(2,2), &
+                        ';', H(3,2), ';', H(1,3), ';', H(2,3), ';', H(3,3)
+                !WRITE(fun2,*) 'MIL tensor M: '
+                !WRITE(fun2,'(3f12.7)') M
+                !WRITE(fun2,*) 'Fabric tensor H: '
+                !WRITE(fun2,'(3f12.7)') H
+                CLOSE(fun2)
 
                 DEALLOCATE(D)
                 DEALLOCATE(d2)
