@@ -235,15 +235,18 @@ MODULE calculate_mil
                         mil = h / cv
                 END SUBROUTINE test
 
-                SUBROUTINE mil_fabric_tensor(fileNameExport, fileNameExportTensor, domainNo, fun1, fun2)
+                SUBROUTINE mil_fabric_tensor(fileNameExport, fileNameExportTensor, domainNo, fun1, fun2, BVTV)
                 IMPLICIT NONE
 
                 ! External variables
                 CHARACTER(LEN = 100), INTENT(IN) :: fileNameExport
                 CHARACTER(LEN = 100), INTENT(IN) :: fileNameExportTensor
+                
                 INTEGER(KIND = int64), INTENT(IN) :: domainNo
                 INTEGER(KIND = int64), INTENT(IN) :: fun1
                 INTEGER(KIND = int64), INTENT(IN) :: fun2
+                
+                REAL(KIND = real64), INTENT(IN) :: BVTV
 
                 ! Internal variables
                 CHARACTER(LEN = 10) :: dummy
@@ -376,8 +379,8 @@ MODULE calculate_mil
                 OPEN(UNIT = fun2, FILE = fileNameExportTensor, IOSTAT = status, ACCESS = 'append')
                 formatString = '(I6, 9(A1, F11.5))'
 
-                WRITE(fun2,formatString) domainNo, ';', H(1,1), ';', H(1,2), ';', H(1,3), ';', H(2,1), ';', H(2,2), &
-                        ';', H(3,2), ';', H(1,3), ';', H(2,3), ';', H(3,3)
+                WRITE(fun2,formatString) domainNo, ';', BVTV, ';', H(1,1), ';', H(1,2), ';', H(1,3), &
+                        ';', H(2,1), ';', H(2,2), ';', H(3,2), ';', H(1,3), ';', H(2,3), ';', H(3,3)
                 !WRITE(fun2,*) 'MIL tensor M: '
                 !WRITE(fun2,'(3f12.7)') M
                 !WRITE(fun2,*) 'Fabric tensor H: '

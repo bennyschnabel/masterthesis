@@ -32,6 +32,8 @@ PROGRAM main
         INTEGER(KIND = int64) :: dpi
         INTEGER(KIND = int64) :: xD
         INTEGER(KIND = int64) :: nnDmax
+        INTEGER(KIND = int64) :: BV
+        INTEGER(KIND = int64) :: TV
         INTEGER(KIND = int64), DIMENSION(3) :: nnD
         INTEGER(KIND = int64), DIMENSION(3) :: dims
         
@@ -41,7 +43,8 @@ PROGRAM main
         REAL(KIND = real64) :: rad2deg
         REAL(KIND = real64) :: start, finish
         REAL(KIND = real64) :: domainSize
-        REAL(KIND = real64) :: delta 
+        REAL(KIND = real64) :: delta
+        REAL(KIND = real64) :: BVTV
         REAL(KIND = real64), DIMENSION(3) :: spcng
         REAL(KIND = real64), DIMENSION(3,1) :: n
         REAL(KIND = real64), DIMENSION(3,1)  :: p0, p1
@@ -73,9 +76,6 @@ PROGRAM main
         !----------------------------------------
         ! Acutal calculation
         !----------------------------------------
-        !Test
-        
-        
 
         CALL CPU_TIME(start)
 
@@ -100,6 +100,7 @@ PROGRAM main
         END SELECT
 
         ! Decomposition of the volume into subvolumes
+        WRITE(*,*) dims
         delta = 25.4 / REAL(DPI)
         WRITE(*,*) delta
         xD = NINT(domainSize / delta)
@@ -114,7 +115,7 @@ PROGRAM main
         ! Export fabric tensor H, csv file
         fileNameExportTensor = fileName(1:LEN_TRIM(fileName)-4) // '_H.csv'
         OPEN(UNIT = fun7, FILE = fileNameExportTensor, IOSTAT = status)
-        WRITE(fun7,*) 'DomainNo; H11; H12; H13; H21; H22; H23; H31; H32; H33'
+        WRITE(fun7,*) 'DomainNo; BVTV; H11; H12; H13; H21; H22; H23; H31; H32; H33'
         CLOSE(fun7)
 
         !MIL calculation loop
@@ -158,7 +159,12 @@ PROGRAM main
                 END DO
                 CLOSE(fun2)
                 
-                CALL mil_fabric_tensor(fileNameExport,fileNameExportTensor, i, fun5, fun6)
+                ! Bone volume fraction (BV/TV)
+                TV = SIZE(array1)
+                BV = TV - SUM(array1, MASK = array1.GT.0)
+                BVTV = REAL(BV) / REAL(TV)
+                
+                CALL mil_fabric_tensor(fileNameExport,fileNameExportTensor, i, fun5, fun6, BVTV)
                 WRITE(*,*) '======================================'
         END DO
 
