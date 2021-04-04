@@ -1,6 +1,9 @@
 MODULE calculate_mil
-        USE ISO_FORTRAN_ENV
-        IMPLICIT NONE
+	USE ISO_FORTRAN_ENV
+	USE aux_routines
+	USE, INTRINSIC :: IEEE_ARITHMETIC, ONLY: IEEE_IS_FINITE 
+
+	!IMPLICIT NONE
 
         CONTAINS
                 SUBROUTINE test(n, dims, array, mil)
@@ -235,163 +238,167 @@ MODULE calculate_mil
                         mil = h / cv
                 END SUBROUTINE test
 
-                SUBROUTINE mil_fabric_tensor(fileNameExport, fileNameExportTensor, domainNo, fun1, fun2, BVTV)
-                IMPLICIT NONE
-
-                ! External variables
-                CHARACTER(LEN = 100), INTENT(IN) :: fileNameExport
-                CHARACTER(LEN = 100), INTENT(IN) :: fileNameExportTensor
+                SUBROUTINE mil_fabric_tensor(fileNameExport, fileNameExportTensor, domainNo, fun1, &
+                 fun2, fun3, noOrientations)
                 
-                INTEGER(KIND = int64), INTENT(IN) :: domainNo
-                INTEGER(KIND = int64), INTENT(IN) :: fun1
-                INTEGER(KIND = int64), INTENT(IN) :: fun2
-                
-                REAL(KIND = real64), INTENT(IN) :: BVTV
+		IMPLICIT NONE
 
-                ! Internal variables
-                CHARACTER(LEN = 10) :: dummy
-                CHARACTER(LEN = 100) :: formatString
+		! Parameter
+		REAL(KIND = real64), PARAMETER :: abserr = 1.0e-09
 
-                INTEGER(KIND = int64) :: status, n, ii, jj
-                INTEGER(KIND = int64), PARAMETER :: q = 13
+		! External variables
+		CHARACTER(LEN = 100), INTENT(IN) :: fileNameExport
+		CHARACTER(LEN = 100), INTENT(IN) :: fileNameExportTensor
 
-                REAL(KIND = real64), PARAMETER :: abserr = 1.0e-09
-                REAL(KIND = real64), DIMENSION(3) :: center, evals
-                REAL(KIND = real64), DIMENSION(9) :: u
-                REAL(KIND = real64), DIMENSION(10) :: v
-                REAL(KIND = real64), DIMENSION(3,3) :: eig, evecs, M, Minv, eig2, evecs2, H, D05
-                REAL(KIND = real64), DIMENSION(4,4) :: A, T, R
-                REAL(KIND = real64), DIMENSION(:), ALLOCATABLE :: theta, phi, mil, x1, x2, x3, d2
-                REAL(KIND = real64), DIMENSION(:,:), ALLOCATABLE :: D
+		INTEGER(KIND = int64), INTENT(IN) :: domainNo
+		INTEGER(KIND = int64), INTENT(IN) :: fun1
+		INTEGER(KIND = int64), INTENT(IN) :: fun2
+		INTEGER(KIND = int64), INTENT(IN) :: fun3
+		INTEGER(KIND = int64), INTENT(IN) :: noOrientations
+
+		! Internal variables
+		CHARACTER(LEN = 10) :: dummy
+		CHARACTER(LEN = 100) :: formatString
+
+		INTEGER(KIND = int64) :: status, ii, jj, n
+		INTEGER(KIND = int64), PARAMETER :: q = 13
+		INTEGER(KIND = int64) :: checkInf
+
+		REAL(KIND = real64) :: dummyReal
+		REAL(KIND = real64) :: checkVal
+		REAL(KIND = real64) :: theta
+		REAL(KIND = real64) :: phi
+		REAL(KIND = real64) :: mil
+		REAL(KIND = real64), DIMENSION(3) :: center, evals
+		REAL(KIND = real64), DIMENSION(9) :: u
+		REAL(KIND = real64), DIMENSION(10) :: v
+		REAL(KIND = real64), DIMENSION(3,3) :: eig, evecs, M, Minv, eig2, evecs2, H, D05
+		REAL(KIND = real64), DIMENSION(4,4) :: A, T, R
+		REAL(KIND = real64), DIMENSION(:), ALLOCATABLE :: x1, x2, x3, d2
+		REAL(KIND = real64), DIMENSION(:,:), ALLOCATABLE :: D
 
                 OPEN(UNIT=fun1, FILE=fileNameExport, IOSTAT=status, STATUS='old')
-                READ(fun1,*) n
-
-                ALLOCATE(theta(n))
-                ALLOCATE(phi(n))
-                ALLOCATE(mil(n))
-                ALLOCATE(x1(n))
-                ALLOCATE(x2(n))
-                ALLOCATE(x3(n))
-
-                DO ii = 1, n
-                        READ(fun1, '(1f6.4,A1,1f6.4,A1,3f8.4)') theta(ii), dummy, phi(ii), dummy, mil(ii)
-
-                        ! Convert from spherical coordinates to cartesian coordinates
-                        x1(ii) = MIL(ii) * SIN(theta(ii)) * COS(phi(ii))
-                        x2(ii) = MIL(ii) * SIN(theta(ii)) * SIN(phi(ii))
-                        x3(ii) = MIL(ii) * COS(theta(ii))
-                END DO
-
-                CLOSE(fun1)
-
-                DEALLOCATE(theta)
-                DEALLOCATE(phi)
-                DEALLOCATE(mil)
-
-                ! fit ellipsoid in the form Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx +
-                ! Hy + 2Iz + J = 0 and A + B + C = 3 constraint removing one extra
-                ! parameter
-                ALLOCATE(D(n,9))
-                ALLOCATE(d2(n))
-
-                DO ii = 1, n
-                        D(ii, 1) = x1(ii) * x1(ii) + x2(ii) * x2(ii) - 2 * x3(ii) * x3(ii)
-                        D(ii, 2) = x1(ii) * x1(ii) + x3(ii) * x3(ii) - 2 * x2(ii) * x2(ii)
-                        D(ii, 3) = 2 * x1(ii) * x2(ii)
-                        D(ii, 4) = 2 * x1(ii) * x3(ii)
-                        D(ii, 5) = 2 * x2(ii) * x3(ii)
-                        D(ii, 6) = 2 * x1(ii)
-                        D(ii, 7) = 2 * x2(ii)
-                        D(ii, 8) = 2 * x3(ii)
-                        D(ii, 9) = 1 + 0 * x1(ii)
-
-                        d2(ii) = x1(ii) * x1(ii) + x2(ii) * x2(ii) + x3(ii) * x3(ii)
-                END DO
-
-                CALL gauss_2(MATMUL(TRANSPOSE(D), D), MATMUL(TRANSPOSE(D), d2), u, 9_int64)
-
-                ! Find the ellipsoid parameters and convert back to the conventional algebraic form
-                v(1) = u(1) + u(2) - 1
-                v(2) = u(1) - 2 * u(2) - 1
-                v(3) = u(2) - 2 * u(1) - 1
-                v(4:10) = u(3:9)
-
-                ! Form the algebraic form of the ellipsoid
-                A = RESHAPE((/ v(1), v(4), v(5), v(7), v(4), v(2), v(6), v(8), v(5) &
-                        , v(6), v(3), v(9), v(7), v(8), v(9), v(10) /), (/ 4, 4/))
-
-                ! Find the center of the ellipsoid
-                CALL gauss_2(-A(1:3, 1:3), v(7:9), center, 3_int64)
-
-                ! Form the corresponding translation matrix
-                T = 0
-                FORALL(ii = 1 : 4) T(ii,ii) = 1
-                T(4, 1:3) = center(1:3)
-
-                R = MATMUL(MATMUL(T, A), TRANSPOSE(T))
-
-                eig = R(1:3, 1:3) / (-R(4,4))
-
-                CALL jacobi(eig, evecs, abserr, 3_int64)
-
-                DO ii = 1, 3
-                        evals(ii) = eig(ii, ii)
-                END DO
-
-                IF (ABS(v(10)) > 1E-6) THEN
-                        v = -v / v(10)
-                END IF
-
-                ! Calculate MIL tensor M
-                M = RESHAPE((/ v(1), v(4), v(5), v(4), v(2), v(6), v(5), v(6), v(3) /), (/ 3, 3/))
-
-                WRITE(*,*) '-------Results-------'
-                WRITE(*,*) 'MIL tensor M: '
-                DO ii = 1, SIZE(M, 1)
-                        WRITE(*,'(20G12.4)') M(ii,:)
-                END DO
-
-                ! Calculate fabric tensor F
-                CALL inverse(M, Minv, 3_int64)
-
-                ! Important to get a 'symmetric matric' for jacobi algorithm
-                eig2 =  nint(Minv * 1000.0) / 1000.0
-
-                CALL jacobi(eig2, evecs2, abserr, 3_int64)
-
-                DO ii = 1, 3
-                        DO jj = 1,3
-                                D05(ii, jj) = 0
-                                IF (ii == jj) THEN
-                                        D05(ii, jj) = sqrt(eig2(ii, jj))
-                                END IF
-                        END DO
-                END DO
-
-                H = MATMUL(MATMUL(evecs2, D05), TRANSPOSE(evecs2))
-
-                WRITE(*,*) 'Fabric tensor H: '
-                DO ii = 1, SIZE(H, 1)
-                        WRITE(*,'(20G12.4)') H(ii,:)
+                
+                checkInf = 0
+                DO ii = 1, noOrientations
+                        READ(fun1, '(1f6.4,A1,1f6.4,A1,3f14.4)') dummyReal, dummy, dummyReal, dummy, dummyReal
+                        IF (IEEE_IS_FINITE(dummyReal)) THEN
+                        	checkInf = checkInf + 1
+                        END IF
                 END DO
                 
-                OPEN(UNIT = fun2, FILE = fileNameExportTensor, IOSTAT = status, ACCESS = 'append')
-                formatString = '(I6, 9(A1, F11.5))'
+                CLOSE(fun1)
+                
+                n = checkInf
 
-                WRITE(fun2,formatString) domainNo, ';', BVTV, ';', H(1,1), ';', H(1,2), ';', H(1,3), &
-                        ';', H(2,1), ';', H(2,2), ';', H(3,2), ';', H(1,3), ';', H(2,3), ';', H(3,3)
-                !WRITE(fun2,*) 'MIL tensor M: '
-                !WRITE(fun2,'(3f12.7)') M
-                !WRITE(fun2,*) 'Fabric tensor H: '
-                !WRITE(fun2,'(3f12.7)') H
-                CLOSE(fun2)
+		ALLOCATE(x1(n))
+		ALLOCATE(x2(n))
+		ALLOCATE(x3(n))
+                
+		OPEN(UNIT=fun1, FILE=fileNameExport, IOSTAT=status, STATUS='old')
+		jj = 1
+		checkInf = 0
+		DO ii = 1, noOrientations
+			READ(fun1, '(1f6.4,A1,1f6.4,A1,3f14.4)') theta, dummy, phi, dummy, mil
+			IF (IEEE_IS_FINITE(mil)) THEN
+				! Convert from spherical coordinates to cartesian coordinates
+				x1(jj) = mil * SIN(theta) * COS(phi)
+				x2(jj) = mil * SIN(theta) * SIN(phi)
+				x3(jj) = mil * COS(theta)
+				jj = jj + 1
+			ELSE
+				checkInf = checkInf + 1
+			END IF
+		END DO
+		CLOSE(fun1)
+                
+                IF (checkInf >= NINT(0.4 * noOrientations)) THEN
+		        OPEN(UNIT = fun2, FILE = fileNameExportTensor, IOSTAT = status, ACCESS = 'append')
+		        formatString = '(I6, 18(A1, I1))'
 
-                DEALLOCATE(D)
-                DEALLOCATE(d2)
-                DEALLOCATE(x1)
-                DEALLOCATE(x2)
-                DEALLOCATE(x3)
+		        WRITE(fun2,formatString) domainNo, ',', 0, ',', 0, ',', 0, &
+		                ',', 0, ',', 0, ',', 0, ',', 0, ',', 0, ',', 0, &
+		                ',', 0, ',', 0, ',', 0, ',', 0, ',', 0, ',', 0, &
+		                ',', 0, ',', 0, ',', 0
+		        CLOSE(fun2)
+                ELSE
+		        ! fit ellipsoid in the form Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx +
+		        ! Hy + 2Iz + J = 0 and A + B + C = 3 constraint removing one extra
+		        ! parameter
+		        ALLOCATE(D(n,9))
+		        ALLOCATE(d2(n))
+
+		        DO ii = 1, n
+		                D(ii, 1) = x1(ii) * x1(ii) + x2(ii) * x2(ii) - 2 * x3(ii) * x3(ii)
+		                D(ii, 2) = x1(ii) * x1(ii) + x3(ii) * x3(ii) - 2 * x2(ii) * x2(ii)
+		                D(ii, 3) = 2 * x1(ii) * x2(ii)
+		                D(ii, 4) = 2 * x1(ii) * x3(ii)
+		                D(ii, 5) = 2 * x2(ii) * x3(ii)
+		                D(ii, 6) = 2 * x1(ii)
+		                D(ii, 7) = 2 * x2(ii)
+		                D(ii, 8) = 2 * x3(ii)
+		                D(ii, 9) = 1 + 0 * x1(ii)
+
+		                d2(ii) = x1(ii) * x1(ii) + x2(ii) * x2(ii) + x3(ii) * x3(ii)
+		        END DO
+
+		        CALL gauss_2(MATMUL(TRANSPOSE(D), D), MATMUL(TRANSPOSE(D), d2), u, 9_int64)
+
+		        ! Find the ellipsoid parameters and convert back to the conventional algebraic form
+		        v(1) = u(1) + u(2) - 1
+		        v(2) = u(1) - 2 * u(2) - 1
+		        v(3) = u(2) - 2 * u(1) - 1
+		        v(4:10) = u(3:9)
+
+		        ! Form the algebraic form of the ellipsoid
+		        A = RESHAPE((/ v(1), v(4), v(5), v(7), v(4), v(2), v(6), v(8), v(5) &
+		                , v(6), v(3), v(9), v(7), v(8), v(9), v(10) /), (/ 4, 4/))
+
+		        ! Find the center of the ellipsoid
+		        CALL gauss_2(-A(1:3, 1:3), v(7:9), center, 3_int64)
+
+		        ! Form the corresponding translation matrix
+		        T = 0
+		        FORALL(ii = 1 : 4) T(ii,ii) = 1
+		        T(4, 1:3) = center(1:3)
+
+		        R = MATMUL(MATMUL(T, A), TRANSPOSE(T))
+
+		        eig = R(1:3, 1:3) / (-R(4,4))
+
+		        CALL jacobi(eig, evecs, abserr, 3_int64)
+
+		        DO ii = 1, 3
+		                evals(ii) = eig(ii, ii)
+		        END DO
+
+		        IF (ABS(v(10)) > 1E-6) THEN
+		                v = -v / v(10)
+		        END IF
+
+		        ! Calculate MIL tensor M
+		        M = RESHAPE((/ v(1), v(4), v(5), v(4), v(2), v(6), v(5), v(6), v(3) /), (/ 3, 3/))
+
+		        WRITE(*,*) '-------Results-------'
+		        WRITE(*,*) 'MIL tensor M: '
+		        DO ii = 1, SIZE(M, 1)
+		                WRITE(*,'(20G12.4)') M(ii,:)
+		        END DO
+		        
+		        OPEN(UNIT = fun2, FILE = fileNameExportTensor, IOSTAT = status, ACCESS = 'append')
+		        formatString = '(I6, 9(A1, E15.7), 9(A1, E15.7))'
+
+		        WRITE(fun2,formatString) domainNo, ',', M(1,1), ',', M(1,2), ',', M(1,3), &
+		                ',', M(2,1), ',', M(2,2), ',', M(3,2), ',', M(1,3), ',', M(2,3), ',', M(3,3), &
+		                ',', evecs(1,1),',', evecs(2,1), ',', evecs(3,1), ',', evecs(1,2), ',', evecs(2,2), &
+		                ',', evecs(3,2), ',', evecs(1,3), ',', evecs(2,3), ',', evecs(3,3)
+	                CLOSE(fun2)
+		        DEALLOCATE(D)
+		        DEALLOCATE(d2)
+		        DEALLOCATE(x1)
+		        DEALLOCATE(x2)
+		        DEALLOCATE(x3)
+                END IF
                         
                 END SUBROUTINE mil_fabric_tensor
 
@@ -678,7 +685,7 @@ MODULE calculate_mil
                 ! comments ...
                 !===========================================================
                 IMPLICIT NONE
-                INTEGER(KIND = int64) :: i, j, k, n
+                INTEGER(KIND = int64) :: i, j, k, n, o
                 REAL(KIND = real64) :: a(n,n),x(n,n)
                 REAL(KIND = real64) :: abserr, b2, bar
                 REAL(KIND = real64) :: beta, coeff, c, s, cs, sc
@@ -702,6 +709,7 @@ MODULE calculate_mil
 
                 ! average for off-diagonal elements /2
                 bar = 0.5*b2/FLOAT(n*n)
+                o = 0
 
                 DO WHILE (b2.gt.abserr)
                         DO i=1,n-1
@@ -734,6 +742,18 @@ MODULE calculate_mil
                                         END DO
                                 END DO
                         END DO
+                        o = o + 1
+                        
+                        IF (o >= 100) THEN
+                        	abserr = 1.0e-06
+                        	WRITE(*,*) 'abserr = 1.0e-06'
+                	ELSEIF (o >= 200) THEN
+                		abserr = 1.0e-03
+                		WRITE(*,*) 'abserr = 1.0e-03'
+        		ELSEIF (o>= 300) THEN
+        			abserr = 1.0
+        			WRITE(*,*) 'abserr = 1.0'
+                	END IF
                 END DO
                 RETURN
                 END SUBROUTINE jacobi
@@ -871,4 +891,3 @@ MODULE calculate_mil
                 END SUBROUTINE importVTK
 
 END MODULE calculate_mil
-

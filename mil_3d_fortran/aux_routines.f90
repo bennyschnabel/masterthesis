@@ -143,7 +143,7 @@ SUBROUTINE read_vtk(fun, fl, array, dims, spcng, size_o, fov_o, bnds_o, log_un, 
   INTEGER  (KIND=INT64)                                 , OPTIONAL, INTENT(IN)     :: log_un
   INTEGER  (KIND=INT64)                                 , OPTIONAL, INTENT(OUT)    :: status_o
   !-- Initialize variables in case they're not used
-  INTEGER  (KIND=INT32)                                                            :: size
+  INTEGER  (KIND=4_ik)                                                            :: sze
   REAL     (KIND=REAL64), DIMENSION(3)                                             :: fov
   INTEGER  (KIND=INT64) , DIMENSION(3,2)                                           :: bnds
   INTEGER  (KIND=INT64)                                                            :: status
@@ -164,7 +164,7 @@ SUBROUTINE read_vtk(fun, fl, array, dims, spcng, size_o, fov_o, bnds_o, log_un, 
   CALL CPU_TIME(start)
 
   !-- Check existence of optional variables
-  IF (PRESENT(size_o)  ) size   = size_o
+  IF (PRESENT(size_o)  ) sze   = size_o
   IF (PRESENT(fov_o)   ) fov    = fov_o
   IF (PRESENT(bnds_o)  ) bnds   = bnds_o
   IF (PRESENT(status_o)) status = status_o
@@ -200,7 +200,7 @@ SUBROUTINE read_vtk(fun, fl, array, dims, spcng, size_o, fov_o, bnds_o, log_un, 
                  CALL value_di(tokens(4), dims(3), ios=ios)
                  bnds(:,1) = 1
                  bnds(:,2) = dims(:)
-                 size      = dims(1)*dims(2)*dims(3)
+                 sze      = dims(1)*dims(2)*dims(3)
               ELSEIF (tokens(1)=="SPACING") THEN
                  CALL value_dr(tokens(2), spcng(1), ios=ios)
                  CALL value_dr(tokens(3), spcng(2), ios=ios)
@@ -227,9 +227,9 @@ SUBROUTINE read_vtk(fun, fl, array, dims, spcng, size_o, fov_o, bnds_o, log_un, 
         fov = dims*spcng
 
         !-- Allocate memory an read array
-        kind = INT( ANINT( REAL((file_size-hdr_lngth), KIND=REAL64) / REAL(size, KIND=REAL64), KIND=INT64))
+        kind = INT( ANINT( REAL((file_size-hdr_lngth), KIND=REAL64) / REAL(sze, KIND=REAL64), KIND=INT64))
 
-        OPEN(UNIT=fun, FILE=fl, CONVERT='LITTLE_ENDIAN', ACCESS="STREAM", FORM="UNFORMATTED", STATUS="OLD")
+        OPEN(UNIT=fun, FILE=fl, CONVERT='BIG_ENDIAN', ACCESS="STREAM", FORM="UNFORMATTED", STATUS="OLD")
 
         IF (TRIM(token(2)) == "float" .OR. TRIM(token(3)) == "float" ) THEN
 
@@ -258,6 +258,8 @@ SUBROUTINE read_vtk(fun, fl, array, dims, spcng, size_o, fov_o, bnds_o, log_un, 
 
            ALLOCATE(array_i_four(dims(1),dims(2),dims(3)))
            READ(UNIT=fun, POS=hdr_lngth) array_i_four(:,:,:)
+           WRITE(*,*) 'MAXVAL:', MAXVAL(array_i_four)
+           WRITE(*,*) 'MINVAL:', MINVAL(array_i_four)
            array = REAL(array_i_four, KIND=REAL64)
            DEALLOCATE(array_i_four)
 
@@ -286,7 +288,7 @@ SUBROUTINE read_vtk(fun, fl, array, dims, spcng, size_o, fov_o, bnds_o, log_un, 
            WRITE(lui,'(A,F6.1,A)')    "Field of View     - x               ", fov(1) , " mm"
            WRITE(lui,'(A,F6.1,A)')    "Field of View     - y               ", fov(2) , " mm"
            WRITE(lui,'(A,F6.1,A)')    "Field of View     - z               ", fov(3) , " mm"
-           WRITE(lui,'(A,I13,A)')     "Size of the internal array:",          size, " Elements"
+           WRITE(lui,'(A,I13,A)')     "Size of the internal array:",          sze, " Elements"
            CALL CPU_TIME(end)             ! deliberately put here to get most realistic impression
            WRITE(lui,'(A,F9.4)')      "Time to read file:               ", end-start
         END IF  ! print log output

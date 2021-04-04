@@ -1,2 +1,0 @@
-PROGRAM test
-END PROGRAM test
