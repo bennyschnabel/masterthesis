@@ -165,7 +165,8 @@ PROGRAM main
 	
 	! Export fabric tensor H, csv file
 	fileNameExportBVTV = fileName(1:LEN_TRIM(fileName)-4) // '_bvtv.csv'
-	fileNameExportTensor = fileName(1:LEN_TRIM(fileName)-4) // '_M.dat'
+	WRITE(n2s,*) noOrientations
+	fileNameExportTensor = fileName(1:LEN_TRIM(fileName)-4) // '_' // TRIM(adjustl(n2s)) // '_M.dat'
         
         OPEN(UNIT = fun4, FILE = fileNameExportBVTV, IOSTAT = status)
 	WRITE(fun4,*) 'DomainNo;BVTV'
