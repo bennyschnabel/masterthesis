@@ -258,8 +258,8 @@ SUBROUTINE read_vtk(fun, fl, array, dims, spcng, size_o, fov_o, bnds_o, log_un, 
 
            ALLOCATE(array_i_four(dims(1),dims(2),dims(3)))
            READ(UNIT=fun, POS=hdr_lngth) array_i_four(:,:,:)
-           WRITE(*,*) 'MAXVAL:', MAXVAL(array_i_four)
-           WRITE(*,*) 'MINVAL:', MINVAL(array_i_four)
+           !WRITE(*,*) 'MAXVAL:', MAXVAL(array_i_four)
+           !WRITE(*,*) 'MINVAL:', MINVAL(array_i_four)
            array = REAL(array_i_four, KIND=REAL64)
            DEALLOCATE(array_i_four)
 

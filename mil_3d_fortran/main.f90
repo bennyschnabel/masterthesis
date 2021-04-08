@@ -95,7 +95,7 @@ PROGRAM main
 	WRITE(*,*) '======================================'
 	WRITE(*,*) 'Mean Intercept Length - Calculation'
 	WRITE(*,*) ''
-	WRITE(*,*) 'Version: 423423'
+	WRITE(*,*) 'Version: -'
 	WRITE(*,*) 'Author: Benjamin Schnabel'
 	WRITE(*,*) '======================================'
 
@@ -103,9 +103,6 @@ PROGRAM main
 	WRITE(*,*) 'File import started'
 	CALL read_vtk(fun1, fileName, array, dims, spcng)
 	WRITE(*,*) 'File import done'
-
-	WRITE(*,*) 'MAXVAL:', MAXVAL(array)
-	WRITE(*,*) 'MINVAL:', MINVAL(array)
 	
 	! Decomposition of the volume into subvolumes
 	WRITE(*,*) 'Dims:', dims

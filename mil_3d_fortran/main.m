@@ -7,10 +7,8 @@ clc; clear all; close all;
 %% Calculate fabric tensor based on mil tensor
 % File name MIL tensor
 fileNameMIL = 'Knochenprobe_2_06_600_M.dat';
-%fileNameMIL = 'Knochenprobe_2_06_600_M_rot.csv';
 % % File name for fabric tensor export file
 fileNameFabric = 'Knochenprobe_2_06_600_H.csv';
-%fileNameFabric = 'Knochenprobe_2_06_600_H_rot.csv';
 % Calculate fabric tensors ['true', 'skip']
 calcFabric = 'skip';
 
