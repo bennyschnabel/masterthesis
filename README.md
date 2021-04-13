@@ -26,7 +26,7 @@ Matlab/ GNU Octave implementation of the MIL tensor
    - gfortran -c calculate_mil.f90
    - gfortran -c main.f90
    - gfortran aux_routines.o kinds.o stringmod.o calculate_mil.o main.o -o main
-5. The result of the calculation is saved in a file with the following structure: *xxx_xxx_M.dat*
+5. The result of the calculation is saved in a file with the following structure: *`fileName`_`noOrientations`_M.dat*
 
 ### Calculation of the fabric tensor and the stiffness matrix
 
