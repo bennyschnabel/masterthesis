@@ -14,10 +14,10 @@ Matlab/ GNU Octave implementation of the MIL tensor
 
 1. Add the *.vtk* file to the folder
 2. Open and edit the *main.f90* file
-   - 'fileName': Name of the *.vtk* file 
-   - 'noOrientations': Number of randomly generated orientation for every subdomain
-   - 'dpi': DPI of image stack (*.vtk* file)
-   - 'domainSize':  Domiain size per subvolume [mm]
+   - `fileName`: Name of the *.vtk* file 
+   - `noOrientations`: Number of randomly generated orientation for every subdomain
+   - `dpi`: DPI of image stack (*.vtk* file)
+   - `domainSize`:  Domiain size per subvolume [mm]
 3. Save the file *main.f90*
 4. Calculate the MIL tensor with the following commands
    - gfortran -c kinds.f90
@@ -28,5 +28,5 @@ Matlab/ GNU Octave implementation of the MIL tensor
    - gfortran aux_routines.o kinds.o stringmod.o calculate_mil.o main.o -o main
 5. The result of the calculation is saved in a file with the following structure: *xxx_xxx_M.dat*
 
-### Calculation of the fabrictensor and the stiffness matrix
+### Calculation of the fabric tensor and the stiffness matrix
 
