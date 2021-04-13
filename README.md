@@ -10,6 +10,12 @@ Matlab/ GNU Octave implementation of the MIL tensor
 
 ## MIL 3D Fortran
 
+### Requirements
+
+- Fortran 90
+- GNU Octave/ MATLAB
+   - For the use of GNU Octave the packages *optim* and *statistics* are required
+
 ### Calculation of the MIL tensor
 
 1. Add the *.vtk* file to the folder
@@ -30,3 +36,8 @@ Matlab/ GNU Octave implementation of the MIL tensor
 
 ### Calculation of the fabric tensor and the stiffness matrix
 
+1. Open and edit the *main.m* file
+2. The fabrictensor is calculated by the following parameters
+   - `fileNameMIL`: File name of the MIL tensor file
+   - `fileNameFabric`: File name for fabric tensor export file
+   - `calcFabric`: true or false

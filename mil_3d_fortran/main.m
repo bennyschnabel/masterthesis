@@ -1,13 +1,20 @@
 clc; clear all; close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Required packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+pkg load optim;
+pkg load statistics;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Input Parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Calculate fabric tensor based on mil tensor
 % File name MIL tensor
 fileNameMIL = 'Knochenprobe_2_06_600_M.dat';
-% % File name for fabric tensor export file
+% File name for fabric tensor export file
 fileNameFabric = 'Knochenprobe_2_06_600_H.csv';
 % Calculate fabric tensors ['true', 'skip']
 calcFabric = 'skip';
@@ -15,40 +22,25 @@ calcFabric = 'skip';
 %% Calculate stiffness tensors based direct on fem input
 % File name FEM data
 fileNameFEM = 'analyze_Knochenprobe_2_0.6_0_eff_s.csv';
-% Calc stiffness/ compliance tensors on direct FEM data input ['stiffness', 'compliance', 'skip']
+% Calc stiffness tensors on direct FEM data input ['stiffness', 'skip']
 calcCowin = 'skip';
 % File name for Cowin coefficients export file
 fileNameCowin = 'Knochenprobe_2_06_600_cowin_coefficients';
-% File name for direct stiffness/ compliance tensors calculation based on Cowin coefficients
+% File name for direct stiffness tensors calculation based on Cowin coefficients
 fileNameDirect = 'Knochenprobe_2_06_600_direct';
 
 %% Calculate Cowin coefficients based on first x entrys of fem data
 % File name for Cowin coefficients export
 fileNameCowinCoeffTotal = 'Knochenprobe_2_06_600_cowin_coefficients_50_pinv.csv';
-% Calc stiffness/ compliance tensors on direct FEM data input ['true','skip']
+% Calc stiffness tensors on direct FEM data input ['true','skip']
 calcCowinFirstXFEM = 'true';
-% Number of rows of FEM for calculation
+% Number of rows from FM for calculation
 numbRowsDM = 50;
 
 % File name for direct stiffness/ compliance tensors calculation based on Cowin coefficients
 fileNameEstimated = 'Knochenprobe_2_06_600_estimated';
-% Calculate stiffness/ compliance tensor ['stiffness', 'compliance', 'skip']
+% Calculate stiffness tensor ['stiffness', 'skip']
 calcTensor = 'skip';
-% Mean or mode ['mean', 'mode', specificRow, total]
-calcStatic = 'total';
-% If specificRow specifie here
-row = 1591;
-% File name BVTVdata
-fileNameBVTV = 'Knochenprobe_2_06_600_bvtv.csv';
-% Threshold for BV/TV
-%thresholdBVTV = 0.6;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Required packages
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-pkg load optim;
-pkg load statistics;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Start to record calculation time
@@ -327,25 +319,6 @@ switch (calcCowin)
         fclose(fid);
       endif
     endfor
-  case {'compliance'}
-    printf ('Cowin coefficients calculation started - compliance\n');
-    fileNameCowinS = strcat(fileNameCowin, '_compliance.csv');
-    fileNameDirect = strcat(fileNameDirect, '_compliance.csv');
-    
-    x = dlmread(fileNameFabric);
-    x = x(2:end,:);
-    
-    fid = fopen(fileNameDirect, 'w+');
-    string = 'DomainNo;D11;D21;D31;D41;D51;D61;D12;D22;D32;D42;D52;D62;D13;D23;D33;D43;D53;D63;D14;D24;D34;D44;D54;D64;D15;D25;D35;D45;D55;D65;D16;D26;D36;D46;D56;D66';
-    fprintf(fid, string);
-    fprintf(fid, '\n');
-    fclose(fid);
-    
-    id = fopen(fileNameCowinS, 'w+');
-    string = 'DomainNo;k1;k2;k3;k4;k5;k6;k7;k8;k9';
-    fprintf(fid, string);
-    fprintf(fid, '\n');
-    fclose(fid);
   otherwise
     printf ('Cowin coefficients calculation skipped\n');
 endswitch
@@ -487,73 +460,9 @@ switch (calcTensor)
     fileNameEstimated = strcat(fileNameEstimated, '_stiffness.csv');
     fileNameCowinS = strcat(fileNameCowin, '_stiffness.csv');
     
-    bvtv = dlmread(fileNameBVTV);
-    bvtv = bvtv(2:end,:);
     
     cowinCoeff = dlmread(fileNameCowinS);
     cowinCoeff = cowinCoeff(2:end,:);
-    
-    [rowsBVTV] = find(bvtv(:,2) >= thresholdBVTV);
-    rowsBVTV = [rowsBVTV];
-    
-    k1 = zeros(length(rowsBVTV), 1);
-    k2 = zeros(length(rowsBVTV), 1);
-    k3 = zeros(length(rowsBVTV), 1);
-    k4 = zeros(length(rowsBVTV), 1);
-    k5 = zeros(length(rowsBVTV), 1);
-    k6 = zeros(length(rowsBVTV), 1);
-    k7 = zeros(length(rowsBVTV), 1);
-    k8 = zeros(length(rowsBVTV), 1);
-    k9 = zeros(length(rowsBVTV), 1);
-    
-    for i = 1 : 1 : length(rowsBVTV)
-      j = rowsBVTV(i);
-      k1(i) = cowinCoeff(j,2);
-      k2(i) = cowinCoeff(j,3);
-      k3(i) = cowinCoeff(j,4);
-      k4(i) = cowinCoeff(j,5);
-      k5(i) = cowinCoeff(j,6);
-      k6(i) = cowinCoeff(j,7);
-      k7(i) = cowinCoeff(j,8);
-      k8(i) = cowinCoeff(j,9);
-      k9(i) = cowinCoeff(j,10);
-    endfor
-    
-    k1mean = nanmean(k1);
-    k1var = nanstd(k1, 0);
-    k1mode = mode(k1);
-
-    k2mean = nanmean(k2);
-    k2var = nanstd(k2, 0);
-    k2mode = mode(k2);
-
-    k3mean = nanmean(k3);
-    k3var = nanstd(k3, 0);
-    k3mode = mode(k3);
-
-    k4mean = nanmean(k4);
-    k4var = nanstd(k4, 0);
-    k4mode = mode(k4);
-
-    k5mean = nanmean(k5);
-    k5var = nanstd(k5, 0);
-    k5mode = mode(k5);
-
-    k6mean = nanmean(k6);
-    k6var = nanstd(k6, 0);
-    k6mode = mode(k6);
-
-    k7mean = nanmean(k7);
-    k7var = nanstd(k7, 0);
-    k7mode = mode(k7);
-
-    k8mean = nanmean(k8);
-    k8var = nanstd(k8, 0);
-    k8mode = mode(k8);
-
-    k9mean = nanmean(k9);
-    k9var = nanstd(k9, 0);
-    k9mode = mode(k9);
         
     x = dlmread(fileNameFabric);
     x = x(2:end,:);
@@ -638,20 +547,9 @@ switch (calcTensor)
         [0, 0, 0, 0, 0, 1, I2, lambda1 + lambda3, lambda1^2 + lambda3^2]; ...
         [0, 0, 0, 0, 0, 1, I2, lambda2 + lambda3, lambda2^2 + lambda3^2]];
         
-        switch (calcStatic)
-          case {'mean'}
-            cowinCoeffK = [k1mean; k2mean; k3mean; k4mean; k5mean; k6mean; k7mean; k8mean; k9mean];
-          case {'mode'}   
-            cowinCoeffK = [k1mode; k2mode; k3mode; k4mode; k5mode; k6mode; k7mode; k8mode; k9mode];
-          case {'specificRow'}
-            cowinCoeffK = [cowinCoeff(row,2); cowinCoeff(row,3); cowinCoeff(row,4); cowinCoeff(row,5); cowinCoeff(row,6); cowinCoeff(row,7); cowinCoeff(row,8); cowinCoeff(row,9); cowinCoeff(row,10)];
-          case {'total'}
-            cowinCoeffTotal = dlmread(fileNameCowinCoeffTotal);
-            cowinCoeffTotal = cowinCoeffTotal(2:end,:);
-            cowinCoeffK = [cowinCoeffTotal(1); cowinCoeffTotal(2); cowinCoeffTotal(3); cowinCoeffTotal(4); cowinCoeffTotal(5); cowinCoeffTotal(6); cowinCoeffTotal(7); cowinCoeffTotal(8); cowinCoeffTotal(9)];
-          otherwise
-            cowinCoeffK = [k1mean; k2mean; k3mean; k4mean; k5mean; k6mean; k7mean; k8mean; k9mean];
-        endswitch 
+        cowinCoeffTotal = dlmread(fileNameCowinCoeffTotal);
+        cowinCoeffTotal = cowinCoeffTotal(2:end,:);
+        cowinCoeffK = [cowinCoeffTotal(1); cowinCoeffTotal(2); cowinCoeffTotal(3); cowinCoeffTotal(4); cowinCoeffTotal(5); cowinCoeffTotal(6); cowinCoeffTotal(7); cowinCoeffTotal(8); cowinCoeffTotal(9)];    
         
         CEntry = A * cowinCoeffK;
         
@@ -682,11 +580,6 @@ switch (calcTensor)
         fclose(fid);
       endif
     endfor
-  case {'compliance'}
-    printf ('Compliance tensor calculation started\n');
-    
-    fileNameEstimated = strcat(fileNameEstimated, '_compliance.csv');
-    fileNameCowin = strcat(fileNameCowin, '_compliance.csv');
   otherwise
     printf ('Stiffness/ compliance tensor calculation skipped\n');
 endswitch
